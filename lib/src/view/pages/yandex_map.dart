@@ -11,20 +11,20 @@ const _initialCameraPosition = CameraPosition(
 );
 const _initialCameraZoom = 12.5;
 
-class YandexMapPage extends StatefulWidget {
+class YandexEffectiveMap extends StatefulWidget {
   final double initialCameraZoom;
   final CameraPosition initialCameraPosition;
-  const YandexMapPage({
+  const YandexEffectiveMap({
     super.key,
     this.initialCameraZoom = _initialCameraZoom,
     CameraPosition? initialCameraPosition,
   }) : initialCameraPosition = initialCameraPosition ?? _initialCameraPosition;
 
   @override
-  State<YandexMapPage> createState() => _YandexMapPageState();
+  State<YandexEffectiveMap> createState() => _YandexEffectiveMapState();
 }
 
-class _YandexMapPageState extends IYandexMapState<YandexMapPage> {
+class _YandexEffectiveMapState extends IYandexMapState<YandexEffectiveMap> {
   @override
   Widget build(BuildContext context) => YandexMap(
         tiltGesturesEnabled: false,

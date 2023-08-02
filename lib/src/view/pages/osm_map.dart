@@ -21,7 +21,7 @@ const _defaultTileTransition = TileDisplay.fadeIn(
 
 const _clusterAnimationsDuration = Duration(milliseconds: 100);
 
-class OSMMapPage extends StatefulWidget {
+class FlutterEffectiveMap extends StatefulWidget {
   static const routeName = '/osm-map-page';
 
   final double minCameraZoom;
@@ -29,7 +29,7 @@ class OSMMapPage extends StatefulWidget {
   final double initialCameraZoom;
   final LatLng initialCameraPosition;
 
-  OSMMapPage({
+  FlutterEffectiveMap({
     super.key,
     this.initialCameraZoom = _initialCameraZoom,
     this.maxCameraZoom = _maxCameraZoom,
@@ -38,10 +38,10 @@ class OSMMapPage extends StatefulWidget {
   }) : initialCameraPosition = initialCameraPosition ?? _initialCameraPosition;
 
   @override
-  State<OSMMapPage> createState() => _OSMMapPageState();
+  State<FlutterEffectiveMap> createState() => _FlutterEffectiveMapState();
 }
 
-class _OSMMapPageState extends IFlutterMapState<OSMMapPage> {
+class _FlutterEffectiveMapState extends IFlutterMapState<FlutterEffectiveMap> {
   @override
   Widget build(BuildContext context) => FlutterMap(
         mapController: mapController,
