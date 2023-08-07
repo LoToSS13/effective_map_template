@@ -1,14 +1,14 @@
 import 'dart:math';
 
-import '../map_object_geometry.dart';
-import '../latlng.dart';
+import 'package:effective_map/src/models/effective_latlng.dart';
+import 'package:effective_map/src/models/map_object_geometry.dart';
 
 const _earthRadius = 6373.0;
 
 class GeometryCenterConverter {
   const GeometryCenterConverter._();
 
-  static LatLng fromLine(List<PointObjectGeometry> geometry) {
+  static EffectiveLatLng fromLine(List<PointObjectGeometry> geometry) {
     var latCenter = 0.0;
     var lonCenter = 0.0;
     final pointsCount = geometry.length;
@@ -19,7 +19,7 @@ class GeometryCenterConverter {
     latCenter /= pointsCount;
     lonCenter /= pointsCount;
 
-    final center = LatLng(latitude: latCenter, longitude: lonCenter);
+    final center = EffectiveLatLng(latitude: latCenter, longitude: lonCenter);
 
     if (geometry.length == 2) {
       return center;
@@ -27,13 +27,13 @@ class GeometryCenterConverter {
 
     final neariestPoint = _getNeariestPointOf(center, geometry);
 
-    return LatLng(
+    return EffectiveLatLng(
       latitude: neariestPoint.center.latitude,
       longitude: neariestPoint.center.longitude,
     );
   }
 
-  static LatLng fromMultiLine(List<LineObjectGeometry> geometry) {
+  static EffectiveLatLng fromMultiLine(List<LineObjectGeometry> geometry) {
     var latCenter = 0.0;
     var lonCenter = 0.0;
     var pointsCount = 0;
@@ -49,17 +49,17 @@ class GeometryCenterConverter {
     latCenter /= pointsCount;
     lonCenter /= pointsCount;
 
-    final center = LatLng(latitude: latCenter, longitude: lonCenter);
+    final center = EffectiveLatLng(latitude: latCenter, longitude: lonCenter);
 
     final neariestPoint = _getNeariestPointOf(center, allPoints);
 
-    return LatLng(
+    return EffectiveLatLng(
       latitude: neariestPoint.center.latitude,
       longitude: neariestPoint.center.longitude,
     );
   }
 
-  static LatLng fromPolygon(List<PointObjectGeometry> geometry) {
+  static EffectiveLatLng fromPolygon(List<PointObjectGeometry> geometry) {
     var latCenter = 0.0;
     var lonCenter = 0.0;
 
@@ -70,10 +70,11 @@ class GeometryCenterConverter {
     latCenter /= geometry.length;
     lonCenter /= geometry.length;
 
-    return LatLng(latitude: latCenter, longitude: lonCenter);
+    return EffectiveLatLng(latitude: latCenter, longitude: lonCenter);
   }
 
-  static LatLng fromMultiPolygon(List<PolygonObjectGeometry> geometry) {
+  static EffectiveLatLng fromMultiPolygon(
+      List<PolygonObjectGeometry> geometry) {
     PolygonObjectGeometry? biggestPolygon;
     var maxPolygonLength = 0.0;
     for (final polygon in geometry) {
@@ -97,7 +98,7 @@ class GeometryCenterConverter {
   }
 
   static PointObjectGeometry _getNeariestPointOf(
-    LatLng startPoint,
+    EffectiveLatLng startPoint,
     List<PointObjectGeometry> points,
   ) {
     var neariestPoint = points.first;

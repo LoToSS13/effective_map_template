@@ -2,12 +2,12 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 
-import '../../models/map_object_wrappers/circle_wrapper.dart';
-import '../../models/map_object_wrappers/map_object.dart';
-import '../../models/map_object_wrappers/multi_polygon_wrapper.dart';
-import '../../models/map_object_wrappers/multi_polyline_wrapper.dart';
-import '../../models/map_object_wrappers/polygon_wrapper.dart';
-import '../../models/map_object_wrappers/polyline_wrapper.dart';
+import 'package:effective_map/src/models/map_object_wrappers/circle_wrapper.dart';
+import 'package:effective_map/src/models/map_object_wrappers/map_object.dart';
+import 'package:effective_map/src/models/map_object_wrappers/multi_polygon_wrapper.dart';
+import 'package:effective_map/src/models/map_object_wrappers/multi_polyline_wrapper.dart';
+import 'package:effective_map/src/models/map_object_wrappers/polygon_wrapper.dart';
+import 'package:effective_map/src/models/map_object_wrappers/polyline_wrapper.dart';
 
 class AnyMapObjectLayer extends StatelessWidget {
   final List<MapObject> mapObjects;

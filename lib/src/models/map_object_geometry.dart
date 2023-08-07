@@ -1,5 +1,5 @@
 import 'converters/geometry_converter.dart';
-import 'latlng.dart';
+import 'effective_latlng.dart';
 
 enum GeometryType { point, line, multiline, polygon, multipolygon, linearRing }
 
@@ -12,7 +12,7 @@ const _geometryTypeEncoder = <String, GeometryType>{
 };
 
 sealed class MapObjectGeometry {
-  final LatLng center;
+  final EffectiveLatLng center;
 
   const MapObjectGeometry({required this.center});
 
@@ -46,33 +46,33 @@ sealed class MapObjectGeometry {
       };
 
   const factory MapObjectGeometry.point({
-    required LatLng center,
+    required EffectiveLatLng center,
   }) = PointObjectGeometry;
 
   const factory MapObjectGeometry.line({
     required List<PointObjectGeometry> points,
-    required LatLng center,
+    required EffectiveLatLng center,
   }) = LineObjectGeometry;
 
   const factory MapObjectGeometry.multiline({
     required List<LineObjectGeometry> lines,
-    required LatLng center,
+    required EffectiveLatLng center,
   }) = MultiLineObjectGeometry;
 
   const factory MapObjectGeometry.linearRing({
     required List<PointObjectGeometry> points,
-    required LatLng center,
+    required EffectiveLatLng center,
   }) = LinearRingObjectGeometry;
 
   const factory MapObjectGeometry.polygon({
     required LinearRingObjectGeometry outerRing,
-    required LatLng center,
+    required EffectiveLatLng center,
     List<LinearRingObjectGeometry>? innerRings,
   }) = PolygonObjectGeometry;
 
   const factory MapObjectGeometry.multipolygon({
     required List<PolygonObjectGeometry> polygons,
-    required LatLng center,
+    required EffectiveLatLng center,
   }) = MultiPolygonObjectGeometry;
 
   factory MapObjectGeometry.fromJson(Map<String, dynamic> json) {

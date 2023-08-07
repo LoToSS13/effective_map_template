@@ -1,11 +1,11 @@
 import 'package:meta/meta.dart';
 
-import 'latlng.dart';
+import 'effective_latlng.dart';
 
 @immutable
 class BBox {
-  final LatLng upperCorner;
-  final LatLng lowerCorner;
+  final EffectiveLatLng upperCorner;
+  final EffectiveLatLng lowerCorner;
 
   const BBox({required this.upperCorner, required this.lowerCorner});
 
@@ -23,7 +23,7 @@ class BBox {
     return false;
   }
 
-  bool includes(LatLng latLng) {
+  bool includes(EffectiveLatLng latLng) {
     if (latLng.latitude >= upperCorner.latitude &&
         latLng.longitude >= upperCorner.longitude &&
         latLng.latitude <= lowerCorner.latitude &&

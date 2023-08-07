@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
-import '../common/constants.dart';
+import 'package:effective_map/src/common/constants.dart';
 
 PlacemarkIcon generatePlacemarkIcon({
   required bool selected,

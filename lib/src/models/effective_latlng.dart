@@ -1,17 +1,17 @@
 import 'package:flutter/foundation.dart';
 
 @immutable
-class LatLong {
+class EffectiveLatLng {
   final double latitude;
   final double longitude;
 
-  const LatLong({required this.latitude, required this.longitude});
+  const EffectiveLatLng({required this.latitude, required this.longitude});
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is LatLong &&
+    return other is EffectiveLatLng &&
         other.latitude == latitude &&
         other.longitude == longitude;
   }

@@ -1,9 +1,10 @@
-import 'package:effective_map/src/common/package_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 
-import '../../common/constants.dart';
+import 'package:effective_map/src/common/constants.dart';
+import 'package:effective_map/src/common/package_colors.dart';
+import 'package:effective_map/src/models/effective_latlng.dart';
+import 'package:effective_map/src/utils/flutter_map_extension.dart';
 
 const inactiveUserLocationShadow = <BoxShadow>[
   BoxShadow(
@@ -36,7 +37,7 @@ const activeUserLocationShadow = <BoxShadow>[
 ];
 
 class UserLocationLayer extends StatelessWidget {
-  final LatLng location;
+  final EffectiveLatLng location;
   final bool isCenteredOnUser;
 
   const UserLocationLayer({
@@ -51,7 +52,7 @@ class UserLocationLayer extends StatelessWidget {
           Marker(
             height: 26,
             width: 26,
-            point: location,
+            point: location.toLatLng(),
             builder: (context) => DecoratedBox(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,

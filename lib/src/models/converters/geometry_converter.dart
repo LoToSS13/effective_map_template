@@ -1,6 +1,6 @@
-import '../map_object_geometry.dart';
-import '../latlng.dart';
-import 'geometry_center_converter.dart';
+import 'package:effective_map/src/models/effective_latlng.dart';
+import 'package:effective_map/src/models/converters/geometry_center_converter.dart';
+import 'package:effective_map/src/models/map_object_geometry.dart';
 
 class GeometryConverter {
   final GeometryType type;
@@ -79,7 +79,7 @@ class GeometryConverter {
 
   PointObjectGeometry _parsePoint(List<dynamic> coordinates) =>
       PointObjectGeometry(
-        center: LatLng(
+        center: EffectiveLatLng(
           latitude: coordinates[1] as double,
           longitude: coordinates[0] as double,
         ),
