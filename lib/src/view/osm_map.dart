@@ -65,7 +65,7 @@ class OSMEffectiveMap extends StatefulWidget {
   final EffectiveMarker? selectedMarker;
   final MapObjectWithGeometry? selectedObject;
 
-  final String? urlTemplate;
+  final String urlTemplate;
   final String userAgentPackageName;
   final EffectiveLatLng? userPosition;
 
@@ -97,11 +97,11 @@ class OSMEffectiveMap extends StatefulWidget {
     this.onMarkerTap,
     this.onObjectTap,
     this.onMapCreate,
-    this.urlTemplate,
     this.userPosition,
     this.checkVisibleObjects,
     this.selectedMarkerView,
     this.unselectedMarkerView,
+    String? urlTemplate,
     double? initialCameraZoom,
     double? maxCameraZoom,
     double? minCameraZoom,
@@ -128,7 +128,8 @@ class OSMEffectiveMap extends StatefulWidget {
         interactivePolygonVisibilityThreshold =
             interactivePolygonVisibilityThreshold ??
                 _interactivePolygonVisibilityThreshold,
-        initialCameraPosition = initialCameraPosition ?? _initialCameraPosition;
+        initialCameraPosition = initialCameraPosition ?? _initialCameraPosition,
+        urlTemplate = urlTemplate ?? '';
 
   @override
   State<OSMEffectiveMap> createState() => _OSMEffectiveMapState();
