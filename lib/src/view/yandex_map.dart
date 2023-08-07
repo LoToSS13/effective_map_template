@@ -120,8 +120,8 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
 
   bool _isCameraCenteredOnUser = false;
 
-  late final List<PlacemarkMapObject> _markers;
-  late final List<MapObject> _objects;
+  late final List<PlacemarkMapObject> _markers = [];
+  late final List<MapObject> _objects = [];
   late final PlacemarkMapObject? _selectedMarker;
   late final MapObject? _selectedObject;
 

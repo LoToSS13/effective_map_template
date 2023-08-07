@@ -142,8 +142,8 @@ class _OSMEffectiveMapState extends State<OSMEffectiveMap>
 
   bool _isCameraCenteredOnUser = false;
 
-  late final List<Marker> _markers;
-  late final List<MapObject> _objects;
+  late final List<Marker> _markers = [];
+  late final List<MapObject> _objects = [];
   late final Marker? _selectedMarker;
   late final MapObject? _selectedObject;
 
