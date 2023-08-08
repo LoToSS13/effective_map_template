@@ -32,7 +32,7 @@ class OSMEffectiveMapController extends EffectiveMapController {
       );
 
   @override
-  Future<void> zoomFitBBox(BBox bbox) async => _controller.animatedFitBounds(
+  Future<void> fitBBox(BBox bbox) async => _controller.animatedFitBounds(
         bbox.toBounds(),
         options: FitBoundsOptions(
           padding: const EdgeInsets.all(12),

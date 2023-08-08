@@ -19,7 +19,7 @@ extension VisibleRegionConverter on VisibleRegion {
       );
 }
 
-extension EffectiveLatLngConverter on BoundingBox {
+extension EffectiveLatLngBBoxConverter on BoundingBox {
   BBox toBBox() => BBox(
         upperCorner: northEast.toEffectiveLatLng(),
         lowerCorner: southWest.toEffectiveLatLng(),

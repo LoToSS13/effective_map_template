@@ -453,10 +453,7 @@ class _OSMEffectiveMapState extends State<OSMEffectiveMap>
 
   @override
   void onMapTap(EffectiveLatLng latLng) {
-    final isFound = _searchForObjectsInPoints(latLng);
-    if (!isFound) {
-      widget.onMapTap?.call(latLng);
-    }
+    widget.onMapTap?.call(latLng);
   }
 
   @override

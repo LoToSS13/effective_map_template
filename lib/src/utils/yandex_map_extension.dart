@@ -6,7 +6,7 @@ import 'package:effective_map/src/models/effective_marker.dart';
 import 'package:effective_map/src/models/effective_network_tiles_provider.dart';
 import 'package:effective_map/src/models/effective_latlng.dart';
 
-extension LatLngConverter on Point {
+extension YandexLatLngConverter on Point {
   EffectiveLatLng toEffectiveLatLng() => EffectiveLatLng(
         latitude: latitude,
         longitude: longitude,
@@ -17,7 +17,7 @@ extension YandexPointConverter on EffectiveLatLng {
   Point toPoint() => Point(latitude: latitude, longitude: longitude);
 }
 
-extension EffectiveMapPositionConverter on CameraPosition {
+extension YandexMapPositionConverter on CameraPosition {
   EffectiveMapPosition toEffectiveMapPosition() =>
       EffectiveMapPosition(center: target.toEffectiveLatLng(), zoom: zoom);
 }

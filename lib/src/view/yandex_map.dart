@@ -115,15 +115,15 @@ class YandexEffectiveMap extends StatefulWidget {
 }
 
 class _YandexEffectiveMapState extends State<YandexEffectiveMap>
-    implements IMapState<MapObject, PlacemarkMapObject> {
+    implements IMapState<MapObject<dynamic>, PlacemarkMapObject> {
   late final YandexMapController _mapController;
 
   bool _isCameraCenteredOnUser = false;
 
   late final List<PlacemarkMapObject> _markers = [];
-  late final List<MapObject> _objects = [];
+  late final List<MapObject<dynamic>> _objects = [];
   late final PlacemarkMapObject? _selectedMarker;
-  late final MapObject? _selectedObject;
+  late final MapObject<dynamic>? _selectedObject;
 
   @override
   bool get isCameraCentredOnUser => _isCameraCenteredOnUser;
@@ -135,10 +135,10 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
   PlacemarkMapObject? get selectedMarker => _selectedMarker;
 
   @override
-  MapObject? get selectedObject => _selectedObject;
+  MapObject<dynamic>? get selectedObject => _selectedObject;
 
   @override
-  List<MapObject> get objects => _objects;
+  List<MapObject<dynamic>> get objects => _objects;
 
   @override
   void initState() {
@@ -180,9 +180,9 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
       );
 
   @override
-  MapObject? convertObject(MapObjectWithGeometry mapObject,
+  MapObject<dynamic>? convertObject(MapObjectWithGeometry mapObject,
           {bool selected = false}) =>
-      mapObject.geometry.mapOrNull<MapObject>(
+      mapObject.geometry.mapOrNull<MapObject<dynamic>>(
         line: (line) => PolylineMapObject(
           mapId: MapObjectId('${mapObject.id}_line'),
           polyline: MapGeometryCreator.createPolyline(line.points),
@@ -360,11 +360,16 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
   }
 
   @override
-  Future<void> onObjectTap(MapObject mapObject) async {
+  Future<void> onObjectTap(MapObject<dynamic> mapObject) async {
     if ((await _mapController.getCameraPosition()).zoom <
         widget.interactivePolygonVisibilityThreshold) return;
-    final object = widget.objects.firstWhereOrNull((element) =>
-        element.id == extractNumberFromText(mapObject.mapId.value));
+    final object = widget.objects.firstWhereOrNull(
+      (element) =>
+          element.id ==
+          extractNumberFromText(
+            mapObject.mapId.value,
+          ),
+    );
     if (object != null) {
       widget.onObjectTap?.call(object);
     }
@@ -372,7 +377,9 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
 
   @override
   Future<void> onCameraPositionChanged(
-      EffectiveMapPosition position, bool finished) async {
+    EffectiveMapPosition position,
+    bool finished,
+  ) async {
     resolveIfCameraCenteredOnUser(position.center);
     if (position.zoom == null || position.zoom! < _markersVisibilityThreshold) {
       return;

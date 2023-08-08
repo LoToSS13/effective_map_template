@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import 'effective_latlng.dart';
+import 'package:effective_map/src/models/effective_latlng.dart';
 
 @immutable
 class BBox {

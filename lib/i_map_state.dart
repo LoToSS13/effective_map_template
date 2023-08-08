@@ -5,7 +5,7 @@ import 'package:effective_map/src/models/effective_marker.dart';
 import 'package:effective_map/src/models/effective_latlng.dart';
 import 'package:effective_map/src/models/map_object_with_geometry.dart';
 
-import 'src/models/bbox.dart';
+import 'package:effective_map/src/models/bbox.dart';
 
 abstract class IMapState<O, Marker> {
   void onCameraPositionChanged(EffectiveMapPosition position, bool finished);

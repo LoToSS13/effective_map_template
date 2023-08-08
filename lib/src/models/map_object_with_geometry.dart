@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import 'map_object_geometry.dart';
+import 'package:effective_map/src/models/map_object_geometry.dart';
 
 typedef ObjectsChunk = List<MapObjectWithGeometry>;
 

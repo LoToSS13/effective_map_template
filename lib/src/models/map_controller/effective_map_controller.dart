@@ -7,6 +7,6 @@ abstract class EffectiveMapController {
 
   Future<void> zoomIn();
   Future<void> zoomOut();
-  Future<void> zoomFitBBox(BBox bbox);
+  Future<void> fitBBox(BBox bbox);
   Future<void> moveTo(EffectiveLatLng latlng);
 }

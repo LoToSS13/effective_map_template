@@ -1,5 +1,5 @@
-import 'converters/geometry_converter.dart';
-import 'effective_latlng.dart';
+import 'package:effective_map/src/models/converters/geometry_converter.dart';
+import 'package:effective_map/src/models/effective_latlng.dart';
 
 enum GeometryType { point, line, multiline, polygon, multipolygon, linearRing }
 

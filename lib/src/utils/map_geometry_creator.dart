@@ -17,7 +17,7 @@ class MapGeometryCreator {
             .toList(),
       );
 
-  static List<MapObject> createMultiPolyline(
+  static List<MapObject<dynamic>> createMultiPolyline(
     List<LineObjectGeometry> geometry,
   ) =>
       geometry.map((e) => createPolyline(e.points) as MapObject).toList();
@@ -53,7 +53,7 @@ class MapGeometryCreator {
             .toList(),
       );
 
-  static List<MapObject> createMultiPolygon(
+  static List<MapObject<dynamic>> createMultiPolygon(
     List<PolygonObjectGeometry> polygons,
   ) =>
       polygons

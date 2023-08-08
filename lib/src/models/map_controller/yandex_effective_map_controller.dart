@@ -29,7 +29,7 @@ class YandexEffectiveMapController extends EffectiveMapController {
   @override
   Future<void> moveTo(EffectiveLatLng latlng) async {
     final zoom = await this.zoom;
-    _controller.moveCamera(
+    await _controller.moveCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: Point(
@@ -47,7 +47,7 @@ class YandexEffectiveMapController extends EffectiveMapController {
   Future<double> get zoom async => (await _controller.getCameraPosition()).zoom;
 
   @override
-  Future<void> zoomFitBBox(BBox bbox) async => _controller.moveCamera(
+  Future<void> fitBBox(BBox bbox) async => _controller.moveCamera(
         CameraUpdate.newBounds(bbox.toBoundringBox()),
         animation: const MapAnimation(duration: 1),
       );

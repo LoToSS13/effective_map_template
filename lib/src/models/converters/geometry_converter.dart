@@ -7,7 +7,7 @@ class GeometryConverter {
 
   const GeometryConverter({this.type = GeometryType.polygon});
 
-  MapObjectGeometry fromJson(List json) {
+  MapObjectGeometry fromJson(List<dynamic> json) {
     switch (type) {
       case GeometryType.point:
         return _parsePoint(json);
