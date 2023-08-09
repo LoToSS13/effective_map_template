@@ -28,7 +28,8 @@ class OSMEffectiveMapController extends EffectiveMapController {
   @override
   Future<void> moveTo(EffectiveLatLng latlng) async => _controller.animateTo(
         dest: latlng.toLatLng(),
-        zoom: max(interactivePolygonVisibilityThreshold, _controller.zoom),
+        zoom: max(interactivePolygonVisibilityThreshold,
+            _controller.mapController.zoom),
       );
 
   @override
@@ -47,8 +48,8 @@ class OSMEffectiveMapController extends EffectiveMapController {
   Future<void> zoomOut() async => _controller.animatedZoomOut();
 
   @override
-  Future<BBox?> get bbox async => _controller.bounds?.toBBox();
+  Future<BBox?> get bbox async => _controller.mapController.bounds?.toBBox();
 
   @override
-  Future<double> get zoom async => _controller.zoom;
+  Future<double> get zoom async => _controller.mapController.zoom;
 }

@@ -336,7 +336,7 @@ class _OSMEffectiveMapState extends State<OSMEffectiveMap>
 
   @override
   Widget build(BuildContext context) => FlutterMap(
-        mapController: _mapController,
+        mapController: _mapController.mapController,
         options: MapOptions(
           center: widget.initialCameraPosition.toLatLng(),
           zoom: widget.initialCameraZoom,
@@ -501,42 +501,10 @@ class _OSMEffectiveMapState extends State<OSMEffectiveMap>
   Future<void> moveCameraToLocation(EffectiveLatLng location) async {
     await _mapController.animateTo(
       dest: LatLng(location.latitude, location.longitude),
-      zoom: max(
-          widget.interactivePolygonVisibilityThreshold, _mapController.zoom),
+      zoom: max(widget.interactivePolygonVisibilityThreshold,
+          _mapController.mapController.zoom),
     );
     widget.checkVisibleObjects?.call();
-  }
-
-  bool _searchForObjectsInPoints(EffectiveLatLng effectiveLatLng) {
-    if (widget.areMarkersVisible) return false;
-    final latLng = effectiveLatLng.toLatLng();
-    if (selectedObject?.bounds.contains(latLng) ?? false) {
-      return true;
-    }
-    final object = _objects.firstWhereOrNull((object) {
-      if (object is PolylineWrapper) {
-        return object.polyline.boundingBox.contains(latLng);
-      }
-      if (object is PolygonWrapper) {
-        return object.polygon.boundingBox.contains(latLng);
-      }
-      if (object is MultiPolylineWrapper) {
-        return object.polylines.any(
-          (polyline) => polyline.boundingBox.contains(latLng),
-        );
-      }
-      if (object is MultiPolygonWrapper) {
-        return object.polygons.any(
-          (polygon) => polygon.boundingBox.contains(latLng),
-        );
-      }
-      return false;
-    });
-    if (object != null) {
-      onObjectTap(object);
-      return true;
-    }
-    return false;
   }
 
   @override
