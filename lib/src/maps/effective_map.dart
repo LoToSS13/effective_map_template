@@ -3,8 +3,8 @@ import 'package:effective_map/src/models/effective_network_tiles_provider.dart';
 import 'package:effective_map/src/models/effective_latlng.dart';
 import 'package:effective_map/src/models/map_controller/effective_map_controller.dart';
 import 'package:effective_map/src/models/map_object_with_geometry.dart';
-import 'package:effective_map/src/view/osm_map.dart';
-import 'package:effective_map/src/view/yandex_map.dart';
+import 'package:effective_map/src/maps/osm/view/osm_map.dart';
+import 'package:effective_map/src/maps/yandex/view/yandex_map.dart';
 import 'package:flutter/material.dart';
 
 import 'package:effective_map/src/models/effective_map_position.dart';

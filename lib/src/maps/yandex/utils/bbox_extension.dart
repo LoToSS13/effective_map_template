@@ -1,8 +1,6 @@
 import 'package:effective_map/src/models/bbox.dart';
 import 'package:effective_map/src/models/effective_latlng.dart';
-import 'package:effective_map/src/utils/yandex_map_extension.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:effective_map/src/maps/yandex/utils/yandex_map_extension.dart';
 
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
@@ -26,27 +24,9 @@ extension EffectiveLatLngBBoxConverter on BoundingBox {
       );
 }
 
-extension EffectiveLatLngBoundsConverter on LatLngBounds {
-  BBox toBBox() => BBox(
-        upperCorner: EffectiveLatLng(
-          latitude: southEast.latitude,
-          longitude: northWest.longitude,
-        ),
-        lowerCorner: EffectiveLatLng(
-          latitude: northWest.latitude,
-          longitude: southEast.longitude,
-        ),
-      );
-}
-
 extension BoundsConverter on BBox {
   BoundingBox toBoundringBox() => BoundingBox(
         northEast: upperCorner.toPoint(),
         southWest: lowerCorner.toPoint(),
-      );
-
-  LatLngBounds toBounds() => LatLngBounds(
-        LatLng(lowerCorner.latitude, lowerCorner.longitude),
-        LatLng(upperCorner.latitude, upperCorner.longitude),
       );
 }

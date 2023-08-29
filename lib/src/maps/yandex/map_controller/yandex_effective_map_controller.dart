@@ -1,11 +1,11 @@
 import 'dart:math';
 
+import 'package:effective_map/src/maps/yandex/utils/bbox_extension.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 import 'package:effective_map/src/models/bbox.dart';
 import 'package:effective_map/src/models/effective_latlng.dart';
 import 'package:effective_map/src/models/map_controller/effective_map_controller.dart';
-import 'package:effective_map/src/utils/bbox_extension.dart';
 
 const _zoomAnimation = MapAnimation(duration: 0.25);
 const _interactivePolygonVisibilityThreshold = 17.3;
