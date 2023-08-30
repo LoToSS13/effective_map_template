@@ -4,12 +4,12 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:effective_map/src/common/package_colors.dart';
 import 'package:effective_map/src/models/bbox.dart';
-import 'package:effective_map/src/models/effective_map_position.dart';
-import 'package:effective_map/src/models/effective_marker.dart';
-import 'package:effective_map/src/models/effective_network_tiles_provider.dart';
-import 'package:effective_map/src/models/effective_latlng.dart';
-import 'package:effective_map/src/models/map_controller/effective_map_controller.dart';
-import 'package:effective_map/src/maps/yandex/map_controller/yandex_effective_map_controller.dart';
+import 'package:effective_map/src/models/map_position.dart';
+import 'package:effective_map/src/models/marker.dart';
+import 'package:effective_map/src/models/network_tiles_provider.dart';
+import 'package:effective_map/src/models/latlng.dart';
+import 'package:effective_map/src/models/map_controller/map_controller.dart';
+import 'package:effective_map/src/maps/yandex/map_controller/yandex_map_controller.dart';
 import 'package:effective_map/src/models/map_object_with_geometry.dart';
 import 'package:effective_map/src/maps/i_map_state.dart';
 import 'package:effective_map/src/maps/yandex/utils/bbox_extension.dart';
@@ -20,10 +20,10 @@ import 'package:effective_map/src/common/number_extractor.dart';
 import 'package:effective_map/src/maps/yandex/utils/placemarks.dart';
 import 'package:effective_map/src/maps/yandex/utils/yandex_map_extension.dart';
 import 'package:flutter/material.dart';
-import 'package:yandex_mapkit/yandex_mapkit.dart';
+import 'package:yandex_mapkit/yandex_mapkit.dart' as yandex;
 
-const _initialCameraPosition = EffectiveMapPosition(
-  center: EffectiveLatLng(latitude: 55.796391, longitude: 49.108891),
+const _initialCameraPosition = MapPosition(
+  center: LatLng(latitude: 55.796391, longitude: 49.108891),
   zoom: _initialCameraZoom,
 );
 
@@ -32,29 +32,29 @@ const _markersVisibilityThreshold = 14.67;
 
 const _interactivePolygonVisibilityThreshold = 17.3;
 
-class YandexEffectiveMap extends StatefulWidget {
-  final void Function(EffectiveMapPosition position, bool finished)?
+class YandexMap extends StatefulWidget {
+  final void Function(MapPosition position, bool finished)?
       onCameraPositionChanged;
-  final void Function(EffectiveLatLng latLng)? onMapTap;
-  final void Function(EffectiveMarker marker)? onMarkerTap;
+  final void Function(LatLng latLng)? onMapTap;
+  final void Function(Marker marker)? onMarkerTap;
   final void Function(MapObjectWithGeometry object)? onObjectTap;
-  final void Function(EffectiveMapController controller)? onMapCreate;
+  final void Function(MapController controller)? onMapCreate;
   final void Function(bool isCentred)? isCameraCentredOnUserCallback;
   final void Function()? checkVisibleObjects;
 
-  final List<EffectiveNetworkTileProvider> tiles;
-  final List<EffectiveMarker> markers;
+  final List<NetworkTileProvider> tiles;
+  final List<Marker> markers;
   final List<MapObjectWithGeometry> objects;
 
-  final EffectiveMarker? selectedMarker;
+  final Marker? selectedMarker;
   final MapObjectWithGeometry? selectedObject;
 
   final String? urlTemplate;
   final String userAgentPackageName;
-  final EffectiveLatLng? userPosition;
+  final LatLng? userPosition;
 
   final double interactivePolygonVisibilityThreshold;
-  final EffectiveMapPosition initialCameraPosition;
+  final MapPosition initialCameraPosition;
   final double initialCameraZoom;
   final bool areMarkersVisible;
 
@@ -66,7 +66,7 @@ class YandexEffectiveMap extends StatefulWidget {
   final Color selectedFillColor;
   final Color unselectedFillColor;
 
-  const YandexEffectiveMap({
+  const YandexMap({
     super.key,
     required this.tiles,
     required this.markers,
@@ -94,7 +94,7 @@ class YandexEffectiveMap extends StatefulWidget {
     bool? areMarkersVisible,
     String? userAgentPackageName,
     double? interactivePolygonVisibilityThreshold,
-    EffectiveMapPosition? initialCameraPosition,
+    MapPosition? initialCameraPosition,
   })  : initialCameraZoom = initialCameraZoom ?? _initialCameraZoom,
         selectedFillColor =
             selectedFillColor ?? PackageColors.selectedFillColor,
@@ -111,34 +111,34 @@ class YandexEffectiveMap extends StatefulWidget {
         initialCameraPosition = initialCameraPosition ?? _initialCameraPosition;
 
   @override
-  State<YandexEffectiveMap> createState() => _YandexEffectiveMapState();
+  State<YandexMap> createState() => _YandexMapState();
 }
 
-class _YandexEffectiveMapState extends State<YandexEffectiveMap>
-    implements IMapState<MapObject<dynamic>, PlacemarkMapObject> {
-  late final YandexMapController _mapController;
+class _YandexMapState extends State<YandexMap>
+    implements IMapState<yandex.MapObject<dynamic>, yandex.PlacemarkMapObject> {
+  late final yandex.YandexMapController _mapController;
 
   bool _isCameraCenteredOnUser = false;
 
-  late final List<PlacemarkMapObject> _markers = [];
-  late final List<MapObject<dynamic>> _objects = [];
-  late final PlacemarkMapObject? _selectedMarker;
-  late final MapObject<dynamic>? _selectedObject;
+  late final List<yandex.PlacemarkMapObject> _markers = [];
+  late final List<yandex.MapObject<dynamic>> _objects = [];
+  late final yandex.PlacemarkMapObject? _selectedMarker;
+  late final yandex.MapObject<dynamic>? _selectedObject;
 
   @override
   bool get isCameraCentredOnUser => _isCameraCenteredOnUser;
 
   @override
-  List<PlacemarkMapObject> get markers => _markers;
+  List<yandex.PlacemarkMapObject> get markers => _markers;
 
   @override
-  PlacemarkMapObject? get selectedMarker => _selectedMarker;
+  yandex.PlacemarkMapObject? get selectedMarker => _selectedMarker;
 
   @override
-  MapObject<dynamic>? get selectedObject => _selectedObject;
+  yandex.MapObject<dynamic>? get selectedObject => _selectedObject;
 
   @override
-  List<MapObject<dynamic>> get objects => _objects;
+  List<yandex.MapObject<dynamic>> get objects => _objects;
 
   @override
   void initState() {
@@ -168,11 +168,11 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
   }
 
   @override
-  PlacemarkMapObject? convertMarker(EffectiveMarker effectiveMarker,
+  yandex.PlacemarkMapObject? convertMarker(Marker packageMarker,
           {bool selected = false}) =>
-      PlacemarkMapObject(
-        mapId: MapObjectId(effectiveMarker.key.toString()),
-        point: effectiveMarker.position.toPoint(),
+      yandex.PlacemarkMapObject(
+        mapId: yandex.MapObjectId(packageMarker.key.toString()),
+        point: packageMarker.position.toPoint(),
         consumeTapEvents: true,
         onTap: (placemark, _) => onMarkerTap(placemark),
         opacity: 1,
@@ -180,11 +180,11 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
       );
 
   @override
-  MapObject<dynamic>? convertObject(MapObjectWithGeometry mapObject,
+  yandex.MapObject<dynamic>? convertObject(MapObjectWithGeometry mapObject,
           {bool selected = false}) =>
-      mapObject.geometry.mapOrNull<MapObject<dynamic>>(
-        line: (line) => PolylineMapObject(
-          mapId: MapObjectId('${mapObject.id}_line'),
+      mapObject.geometry.mapOrNull<yandex.MapObject<dynamic>>(
+        line: (line) => yandex.PolylineMapObject(
+          mapId: yandex.MapObjectId('${mapObject.id}_line'),
           polyline: MapGeometryCreator.createPolyline(line.points),
           strokeWidth: 1,
           turnRadius: 0,
@@ -194,14 +194,15 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
               : widget.unselectedStrokeColor,
           onTap: (object, _) => onObjectTap(object),
         ),
-        multiline: (multiline) => MapObjectCollection(
-          mapId: MapObjectId('${mapObject.id}_multiline'),
+        multiline: (multiline) => yandex.MapObjectCollection(
+          mapId: yandex.MapObjectId('${mapObject.id}_multiline'),
           onTap: (object, _) => onObjectTap(object),
           zIndex: selected ? 1 : 0,
           mapObjects: multiline.lines
               .map(
-                (e) => PolylineMapObject(
-                  mapId: MapObjectId('${mapObject.id}_line_${e.hashCode}'),
+                (e) => yandex.PolylineMapObject(
+                  mapId:
+                      yandex.MapObjectId('${mapObject.id}_line_${e.hashCode}'),
                   polyline: MapGeometryCreator.createPolyline(e.points),
                   strokeWidth: 1,
                   turnRadius: 0,
@@ -212,8 +213,8 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
               )
               .toList(),
         ),
-        polygon: (polygon) => PolygonMapObject(
-          mapId: MapObjectId('${mapObject.id}_polygon'),
+        polygon: (polygon) => yandex.PolygonMapObject(
+          mapId: yandex.MapObjectId('${mapObject.id}_polygon'),
           zIndex: selected ? 1 : 0,
           polygon: MapGeometryCreator.createPolygon(
             polygon.outerRing,
@@ -226,14 +227,15 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
               selected ? widget.selectedFillColor : widget.unselectedFillColor,
           onTap: (object, _) => onObjectTap(object),
         ),
-        multipolygon: (multipolygon) => MapObjectCollection(
-          mapId: MapObjectId('${mapObject.id}_multipolygon'),
+        multipolygon: (multipolygon) => yandex.MapObjectCollection(
+          mapId: yandex.MapObjectId('${mapObject.id}_multipolygon'),
           zIndex: selected ? 1 : 0,
           onTap: (object, _) => onObjectTap(object),
           mapObjects: multipolygon.polygons
               .map(
-                (e) => PolygonMapObject(
-                  mapId: MapObjectId('${mapObject.id}_polygon_${e.hashCode}'),
+                (e) => yandex.PolygonMapObject(
+                  mapId: yandex.MapObjectId(
+                      '${mapObject.id}_polygon_${e.hashCode}'),
                   polygon: MapGeometryCreator.createPolygon(
                     e.outerRing,
                     e.innerRings ?? [],
@@ -257,7 +259,7 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
   }
 
   @override
-  Widget build(BuildContext context) => YandexMap(
+  Widget build(BuildContext context) => yandex.YandexMap(
         tiltGesturesEnabled: false,
         rotateGesturesEnabled: false,
         mode2DEnabled: true,
@@ -268,9 +270,9 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
             userLocationView.copyWith(
           pin: userLocationView.pin.copyWith(
             opacity: 1,
-            icon: PlacemarkIcon.single(
-              PlacemarkIconStyle(
-                image: BitmapDescriptor.fromBytes(
+            icon: yandex.PlacemarkIcon.single(
+              yandex.PlacemarkIconStyle(
+                image: yandex.BitmapDescriptor.fromBytes(
                   await drawUserLocation(
                     devicePixelRatio: _devicePixelRatio,
                   ),
@@ -281,9 +283,9 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
           ),
           arrow: userLocationView.arrow.copyWith(
             opacity: 1,
-            icon: PlacemarkIcon.single(
-              PlacemarkIconStyle(
-                image: BitmapDescriptor.fromBytes(
+            icon: yandex.PlacemarkIcon.single(
+              yandex.PlacemarkIconStyle(
+                image: yandex.BitmapDescriptor.fromBytes(
                   await drawUserLocation(
                     devicePixelRatio: _devicePixelRatio,
                   ),
@@ -303,31 +305,31 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
 
           _mapController
             ..moveCamera(
-              CameraUpdate.newCameraPosition(
+              yandex.CameraUpdate.newCameraPosition(
                 widget.initialCameraPosition.toCameraPosition(),
               ),
             )
             ..toggleUserLayer(visible: true);
-          widget.onMapCreate?.call(YandexEffectiveMapController(
+          widget.onMapCreate?.call(YandexMapController(
             controller: _mapController,
             interactivePolygonVisibilityThreshold:
                 widget.interactivePolygonVisibilityThreshold,
           ));
         },
-        onMapTap: (point) => onMapTap(point.toEffectiveLatLng()),
+        onMapTap: (point) => onMapTap(point.toLatLng()),
         mapObjects: [
           if (widget.areMarkersVisible)
-            ClusterizedPlacemarkCollection(
-              mapId: const MapObjectId('excavation_cluster'),
+            yandex.ClusterizedPlacemarkCollection(
+              mapId: const yandex.MapObjectId('excavation_cluster'),
               placemarks: markers,
               radius: 30,
               minZoom: 18,
               onClusterAdded: (self, cluster) async => cluster.copyWith(
                 appearance: cluster.appearance.copyWith(
                   opacity: 1,
-                  icon: PlacemarkIcon.single(
-                    PlacemarkIconStyle(
-                      image: BitmapDescriptor.fromBytes(
+                  icon: yandex.PlacemarkIcon.single(
+                    yandex.PlacemarkIconStyle(
+                      image: yandex.BitmapDescriptor.fromBytes(
                         await drawCluster(
                           cluster,
                           devicePixelRatio: _devicePixelRatio,
@@ -346,21 +348,20 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
           if (widget.areMarkersVisible) ...objects,
         ],
         onCameraPositionChanged: (position, _, finished) =>
-            onCameraPositionChanged(
-                position.toEffectiveMapPosition(), finished),
+            onCameraPositionChanged(position.toMapPosition(), finished),
       );
 
   double get _devicePixelRatio => MediaQuery.of(context).devicePixelRatio;
 
   @override
-  void onMarkerTap(PlacemarkMapObject marker) {
+  void onMarkerTap(yandex.PlacemarkMapObject marker) {
     if (selectedMarker == marker.mapId) return;
-    moveCameraToLocation(marker.point.toEffectiveLatLng());
-    widget.onMarkerTap?.call(marker.toEffectiveMerker());
+    moveCameraToLocation(marker.point.toLatLng());
+    widget.onMarkerTap?.call(marker.toMarker());
   }
 
   @override
-  Future<void> onObjectTap(MapObject<dynamic> mapObject) async {
+  Future<void> onObjectTap(yandex.MapObject<dynamic> mapObject) async {
     if ((await _mapController.getCameraPosition()).zoom <
         widget.interactivePolygonVisibilityThreshold) return;
     final object = widget.objects.firstWhereOrNull(
@@ -377,7 +378,7 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
 
   @override
   Future<void> onCameraPositionChanged(
-    EffectiveMapPosition position,
+    MapPosition position,
     bool finished,
   ) async {
     resolveIfCameraCenteredOnUser(position.center);
@@ -391,7 +392,7 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
   }
 
   @override
-  void resolveIfCameraCenteredOnUser(EffectiveLatLng? position) {
+  void resolveIfCameraCenteredOnUser(LatLng? position) {
     var isCentered = false;
     if (position?.latitude.toStringAsFixed(4) ==
             widget.userPosition?.latitude.toStringAsFixed(4) &&
@@ -408,26 +409,26 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
   }
 
   @override
-  Future<void> moveCameraToLocation(EffectiveLatLng location) async {
+  Future<void> moveCameraToLocation(LatLng location) async {
     final zoom = (await _mapController.getCameraPosition()).zoom;
     _mapController.moveCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: Point(
+      yandex.CameraUpdate.newCameraPosition(
+        yandex.CameraPosition(
+          target: yandex.Point(
             latitude: location.latitude,
             longitude: location.longitude,
           ),
           zoom: max(_interactivePolygonVisibilityThreshold, zoom),
         ),
       ),
-      animation: const MapAnimation(duration: 1),
+      animation: const yandex.MapAnimation(duration: 1),
     );
   }
 
   @override
   Future<void> moveCameraToMatchBBox(BBox bbox) => _mapController.moveCamera(
-        CameraUpdate.newBounds(bbox.toBoundringBox()),
-        animation: const MapAnimation(duration: 1),
+        yandex.CameraUpdate.newBounds(bbox.toBoundringBox()),
+        animation: const yandex.MapAnimation(duration: 1),
       );
 
   @override
@@ -436,7 +437,7 @@ class _YandexEffectiveMapState extends State<YandexEffectiveMap>
   }
 
   @override
-  void onMapTap(EffectiveLatLng latLng) {
+  void onMapTap(LatLng latLng) {
     widget.onMapTap?.call(latLng);
   }
 }

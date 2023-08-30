@@ -1,27 +1,27 @@
-import 'package:effective_map/src/models/effective_map_position.dart';
-import 'package:effective_map/src/models/effective_marker.dart';
-import 'package:effective_map/src/models/effective_latlng.dart';
+import 'package:effective_map/src/models/map_position.dart' as mp;
+import 'package:effective_map/src/models/marker.dart' as marker;
+import 'package:effective_map/src/models/latlng.dart' as lat_lng;
 
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
 
-extension EffectiveMapPositionConverter on MapPosition {
-  EffectiveMapPosition toEffectiveMapPosition() => EffectiveMapPosition(
-        center: center?.toEffectiveLatLng(),
+extension MapPositionConverter on MapPosition {
+  mp.MapPosition toMapPosition() => mp.MapPosition(
+        center: center?.toLatLng(),
         zoom: zoom,
       );
 }
 
 extension LatLngConverter on LatLng {
-  EffectiveLatLng toEffectiveLatLng() =>
-      EffectiveLatLng(latitude: latitude, longitude: longitude);
+  lat_lng.LatLng toLatLng() =>
+      lat_lng.LatLng(latitude: latitude, longitude: longitude);
 }
 
-extension EffectiveLatLngConverter on EffectiveLatLng {
+extension PackageLatLngConverter on lat_lng.LatLng {
   LatLng toLatLng() => LatLng(latitude, longitude);
 }
 
 extension FlutterMarkerConverter on Marker {
-  EffectiveMarker toEffectiveMarker() =>
-      EffectiveMarker(key: key, position: point.toEffectiveLatLng());
+  marker.Marker toEffectiveMarker() =>
+      marker.Marker(key: key, position: point.toLatLng());
 }

@@ -1,15 +1,16 @@
-import 'package:effective_map/src/models/bbox.dart';
-import 'package:effective_map/src/models/effective_latlng.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-extension EffectiveLatLngBoundsConverter on LatLngBounds {
+import 'package:effective_map/src/models/bbox.dart';
+import 'package:effective_map/src/models/latlng.dart' as lat_lng;
+
+extension LatLngBoundsConverter on LatLngBounds {
   BBox toBBox() => BBox(
-        upperCorner: EffectiveLatLng(
+        upperCorner: lat_lng.LatLng(
           latitude: southEast.latitude,
           longitude: northWest.longitude,
         ),
-        lowerCorner: EffectiveLatLng(
+        lowerCorner: lat_lng.LatLng(
           latitude: northWest.latitude,
           longitude: southEast.longitude,
         ),

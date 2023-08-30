@@ -3,15 +3,22 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map/plugin_api.dart';
+import 'package:flutter_map_animations/flutter_map_animations.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+import 'package:latlong2/latlong.dart';
+
 import 'package:effective_map/src/common/constants.dart';
 import 'package:effective_map/src/common/package_colors.dart';
 import 'package:effective_map/src/models/bbox.dart';
-import 'package:effective_map/src/models/effective_map_position.dart';
-import 'package:effective_map/src/models/effective_marker.dart';
-import 'package:effective_map/src/models/effective_network_tiles_provider.dart';
-import 'package:effective_map/src/models/effective_latlng.dart';
-import 'package:effective_map/src/models/map_controller/effective_map_controller.dart';
-import 'package:effective_map/src/maps/osm/map_controller/osm_effective_map_controller.dart';
+import 'package:effective_map/src/models/map_position.dart' as mp;
+import 'package:effective_map/src/models/marker.dart' as marker;
+import 'package:effective_map/src/models/network_tiles_provider.dart' as tile;
+import 'package:effective_map/src/models/latlng.dart' as lat_lng;
+import 'package:effective_map/src/models/map_controller/map_controller.dart'
+    as mc;
 import 'package:effective_map/src/models/map_object_with_geometry.dart';
 import 'package:effective_map/src/models/map_object_wrappers/circle_wrapper.dart';
 import 'package:effective_map/src/models/map_object_wrappers/map_object.dart';
@@ -19,6 +26,7 @@ import 'package:effective_map/src/models/map_object_wrappers/multi_polygon_wrapp
 import 'package:effective_map/src/models/map_object_wrappers/multi_polyline_wrapper.dart';
 import 'package:effective_map/src/models/map_object_wrappers/polygon_wrapper.dart';
 import 'package:effective_map/src/models/map_object_wrappers/polyline_wrapper.dart';
+import 'package:effective_map/src/maps/osm/map_controller/osm_map_controller.dart';
 import 'package:effective_map/src/maps/i_map_state.dart';
 import 'package:effective_map/src/maps/osm/utils/bbox_extension.dart';
 import 'package:effective_map/src/maps/osm/utils/cached_tile_provider.dart';
@@ -27,15 +35,9 @@ import 'package:effective_map/src/common/number_extractor.dart';
 import 'package:effective_map/src/maps/osm/view/widgets/any_map_object_layer.dart';
 import 'package:effective_map/src/maps/osm/view/widgets/cluster_widget.dart';
 import 'package:effective_map/src/maps/osm/view/widgets/user_location_layer.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map/plugin_api.dart';
-import 'package:flutter_map_animations/flutter_map_animations.dart';
-import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
-import 'package:latlong2/latlong.dart';
 
 const _initialCameraPosition =
-    EffectiveLatLng(latitude: 55.796391, longitude: 49.108891);
+    lat_lng.LatLng(latitude: 55.796391, longitude: 49.108891);
 const _initialCameraZoom = 12.5;
 const _maxCameraZoom = 19.0;
 const _minCameraZoom = 3.0;
@@ -48,29 +50,29 @@ const _defaultTileTransition = TileDisplay.fadeIn(
 
 const _clusterAnimationsDuration = Duration(milliseconds: 100);
 
-class OSMEffectiveMap extends StatefulWidget {
-  final void Function(EffectiveMapPosition position, bool finished)?
+class OSMMap extends StatefulWidget {
+  final void Function(mp.MapPosition position, bool finished)?
       onCameraPositionChanged;
-  final void Function(EffectiveLatLng latLng)? onMapTap;
-  final void Function(EffectiveMarker marker)? onMarkerTap;
+  final void Function(lat_lng.LatLng latLng)? onMapTap;
+  final void Function(marker.Marker marker)? onMarkerTap;
   final void Function(MapObjectWithGeometry object)? onObjectTap;
-  final void Function(EffectiveMapController controller)? onMapCreate;
+  final void Function(mc.MapController controller)? onMapCreate;
   final void Function(bool isCentred)? isCameraCentredOnUserCallback;
   final void Function()? checkVisibleObjects;
 
-  final List<EffectiveNetworkTileProvider> tiles;
-  final List<EffectiveMarker> markers;
+  final List<tile.NetworkTileProvider> tiles;
+  final List<marker.Marker> markers;
   final List<MapObjectWithGeometry> objects;
 
-  final EffectiveMarker? selectedMarker;
+  final marker.Marker? selectedMarker;
   final MapObjectWithGeometry? selectedObject;
 
   final String urlTemplate;
   final String userAgentPackageName;
-  final EffectiveLatLng? userPosition;
+  final lat_lng.LatLng? userPosition;
 
   final double interactivePolygonVisibilityThreshold;
-  final EffectiveLatLng initialCameraPosition;
+  final lat_lng.LatLng initialCameraPosition;
   final double minCameraZoom;
   final double maxCameraZoom;
   final double initialCameraZoom;
@@ -84,7 +86,7 @@ class OSMEffectiveMap extends StatefulWidget {
   final Color selectedFillColor;
   final Color unselectedFillColor;
 
-  const OSMEffectiveMap({
+  const OSMMap({
     super.key,
     required this.tiles,
     required this.markers,
@@ -112,7 +114,7 @@ class OSMEffectiveMap extends StatefulWidget {
     bool? areMarkersVisible,
     String? userAgentPackageName,
     double? interactivePolygonVisibilityThreshold,
-    EffectiveLatLng? initialCameraPosition,
+    lat_lng.LatLng? initialCameraPosition,
   })  : initialCameraZoom = initialCameraZoom ?? _initialCameraZoom,
         maxCameraZoom = maxCameraZoom ?? _maxCameraZoom,
         minCameraZoom = minCameraZoom ?? _minCameraZoom,
@@ -132,10 +134,10 @@ class OSMEffectiveMap extends StatefulWidget {
         urlTemplate = urlTemplate ?? '';
 
   @override
-  State<OSMEffectiveMap> createState() => _OSMEffectiveMapState();
+  State<OSMMap> createState() => _OSMMapState();
 }
 
-class _OSMEffectiveMapState extends State<OSMEffectiveMap>
+class _OSMMapState extends State<OSMMap>
     with TickerProviderStateMixin
     implements IMapState<MapObject, Marker> {
   late final AnimatedMapController _mapController =
@@ -197,13 +199,12 @@ class _OSMEffectiveMapState extends State<OSMEffectiveMap>
   }
 
   @override
-  Marker? convertMarker(EffectiveMarker effectiveMarker,
-          {bool selected = false}) =>
+  Marker? convertMarker(marker.Marker packageMarker, {bool selected = false}) =>
       Marker(
-        key: effectiveMarker.key,
+        key: packageMarker.key,
         height: 56,
         width: 50,
-        point: effectiveMarker.position.toLatLng(),
+        point: packageMarker.position.toLatLng(),
         anchorPos: AnchorPos.align(AnchorAlign.top),
         builder: (context) => Align(
           alignment: Alignment.bottomCenter,
@@ -346,17 +347,17 @@ class _OSMEffectiveMapState extends State<OSMEffectiveMap>
               InteractiveFlag.drag |
               InteractiveFlag.doubleTapZoom |
               InteractiveFlag.pinchMove,
-          onPositionChanged: (position, hasGesture) => onCameraPositionChanged(
-              position.toEffectiveMapPosition(), !hasGesture),
+          onPositionChanged: (position, hasGesture) =>
+              onCameraPositionChanged(position.toMapPosition(), !hasGesture),
           onMapEvent: (event) {
             if (event.source == MapEventSource.dragEnd) {
               widget.checkVisibleObjects?.call();
             }
           },
-          onTap: (position, latLng) => onMapTap(latLng.toEffectiveLatLng()),
+          onTap: (position, latLng) => onMapTap(latLng.toLatLng()),
           onMapReady: () {
             widget.onMapCreate?.call(
-              OSMEffectiveMapController(
+              OSMMapController(
                   controller: _mapController,
                   maxCameraZoom: widget.maxCameraZoom,
                   interactivePolygonVisibilityThreshold:
@@ -444,7 +445,7 @@ class _OSMEffectiveMapState extends State<OSMEffectiveMap>
       );
 
   @override
-  void onCameraPositionChanged(EffectiveMapPosition position, bool finished) {
+  void onCameraPositionChanged(mp.MapPosition position, bool finished) {
     if (position.center != null) {
       resolveIfCameraCenteredOnUser(position.center!);
     }
@@ -452,7 +453,7 @@ class _OSMEffectiveMapState extends State<OSMEffectiveMap>
   }
 
   @override
-  void onMapTap(EffectiveLatLng latLng) {
+  void onMapTap(lat_lng.LatLng latLng) {
     widget.onMapTap?.call(latLng);
   }
 
@@ -470,7 +471,7 @@ class _OSMEffectiveMapState extends State<OSMEffectiveMap>
   @override
   void onMarkerTap(Marker marker) {
     if (_selectedMarker?.key == marker.key) return;
-    moveCameraToLocation(marker.point.toEffectiveLatLng());
+    moveCameraToLocation(marker.point.toLatLng());
     widget.onMarkerTap?.call(marker.toEffectiveMarker());
   }
 
@@ -498,7 +499,7 @@ class _OSMEffectiveMapState extends State<OSMEffectiveMap>
   }
 
   @override
-  Future<void> moveCameraToLocation(EffectiveLatLng location) async {
+  Future<void> moveCameraToLocation(lat_lng.LatLng location) async {
     await _mapController.animateTo(
       dest: LatLng(location.latitude, location.longitude),
       zoom: max(widget.interactivePolygonVisibilityThreshold,
@@ -508,7 +509,7 @@ class _OSMEffectiveMapState extends State<OSMEffectiveMap>
   }
 
   @override
-  void resolveIfCameraCenteredOnUser(EffectiveLatLng center) {
+  void resolveIfCameraCenteredOnUser(lat_lng.LatLng center) {
     var isCentered = false;
     if (center.latitude.toStringAsFixed(4) ==
             widget.userPosition?.latitude.toStringAsFixed(4) &&

@@ -1,13 +1,14 @@
-import 'package:effective_map/src/models/effective_marker.dart';
-import 'package:effective_map/src/models/effective_network_tiles_provider.dart';
-import 'package:effective_map/src/models/effective_latlng.dart';
-import 'package:effective_map/src/models/map_controller/effective_map_controller.dart';
+import 'package:flutter/material.dart';
+
+import 'package:effective_map/src/models/marker.dart';
+import 'package:effective_map/src/models/network_tiles_provider.dart';
+import 'package:effective_map/src/models/latlng.dart';
+import 'package:effective_map/src/models/map_controller/map_controller.dart'
+    as mc;
 import 'package:effective_map/src/models/map_object_with_geometry.dart';
 import 'package:effective_map/src/maps/osm/view/osm_map.dart';
 import 'package:effective_map/src/maps/yandex/view/yandex_map.dart';
-import 'package:flutter/material.dart';
-
-import 'package:effective_map/src/models/effective_map_position.dart';
+import 'package:effective_map/src/models/map_position.dart' as mp;
 
 enum MapSamples {
   yandex,
@@ -17,28 +18,28 @@ enum MapSamples {
 class EffectiveMap extends StatelessWidget {
   final MapSamples mapSample;
 
-  final void Function(EffectiveMapPosition position, bool finished)?
+  final void Function(mp.MapPosition position, bool finished)?
       onCameraPositionChanged;
-  final void Function(EffectiveLatLng latLng)? onMapTap;
-  final void Function(EffectiveMarker marker)? onMarkerTap;
+  final void Function(LatLng latLng)? onMapTap;
+  final void Function(Marker marker)? onMarkerTap;
   final void Function(MapObjectWithGeometry object)? onObjectTap;
-  final void Function(EffectiveMapController controller)? onMapCreate;
+  final void Function(mc.MapController controller)? onMapCreate;
   final void Function(bool isCentred)? isCameraCentredOnUserCallback;
   final void Function()? checkVisibleObjects;
 
-  final List<EffectiveNetworkTileProvider> tiles;
-  final List<EffectiveMarker> markers;
+  final List<NetworkTileProvider> tiles;
+  final List<Marker> markers;
   final List<MapObjectWithGeometry> objects;
 
-  final EffectiveMarker? selectedMarker;
+  final Marker? selectedMarker;
   final MapObjectWithGeometry? selectedObject;
 
   final String? urlTemplate;
   final String? userAgentPackageName;
-  final EffectiveLatLng? userPosition;
+  final LatLng? userPosition;
 
   final double? interactivePolygonVisibilityThreshold;
-  final EffectiveLatLng? initialCameraPosition;
+  final LatLng? initialCameraPosition;
   final double? minCameraZoom;
   final double? maxCameraZoom;
   final double? initialCameraZoom;
@@ -86,7 +87,7 @@ class EffectiveMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => switch (mapSample) {
-        MapSamples.yandex => YandexEffectiveMap(
+        MapSamples.yandex => YandexMap(
             // Data
             tiles: tiles,
             urlTemplate: urlTemplate,
@@ -116,12 +117,12 @@ class EffectiveMap extends StatelessWidget {
             unselectedFillColor: unselectedFillColor,
             interactivePolygonVisibilityThreshold:
                 interactivePolygonVisibilityThreshold,
-            initialCameraPosition: EffectiveMapPosition(
+            initialCameraPosition: mp.MapPosition(
               center: initialCameraPosition,
               zoom: initialCameraZoom,
             ),
           ),
-        MapSamples.osm => OSMEffectiveMap(
+        MapSamples.osm => OSMMap(
             // Data
             tiles: tiles,
             urlTemplate: urlTemplate,

@@ -1,26 +1,26 @@
 import 'package:effective_map/src/models/bbox.dart';
-import 'package:effective_map/src/models/effective_latlng.dart';
+import 'package:effective_map/src/models/latlng.dart';
 import 'package:effective_map/src/maps/yandex/utils/yandex_map_extension.dart';
 
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 extension VisibleRegionConverter on VisibleRegion {
   BBox toBBox() => BBox(
-        upperCorner: EffectiveLatLng(
+        upperCorner: LatLng(
           latitude: bottomRight.latitude,
           longitude: topLeft.longitude,
         ),
-        lowerCorner: EffectiveLatLng(
+        lowerCorner: LatLng(
           latitude: topLeft.latitude,
           longitude: bottomRight.longitude,
         ),
       );
 }
 
-extension EffectiveLatLngBBoxConverter on BoundingBox {
+extension LatLngBBoxConverter on BoundingBox {
   BBox toBBox() => BBox(
-        upperCorner: northEast.toEffectiveLatLng(),
-        lowerCorner: southWest.toEffectiveLatLng(),
+        upperCorner: northEast.toLatLng(),
+        lowerCorner: southWest.toLatLng(),
       );
 }
 
