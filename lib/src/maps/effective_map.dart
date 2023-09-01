@@ -90,7 +90,7 @@ class EffectiveMap extends StatelessWidget {
         MapSamples.yandex => YandexMap(
             // Data
             tiles: tiles,
-            urlTemplate: urlTemplate,
+
             userAgentPackageName: userAgentPackageName,
             markers: markers,
             objects: objects,
@@ -109,7 +109,6 @@ class EffectiveMap extends StatelessWidget {
             // Customization
             selectedMarkerView: selectedMarkerView,
             unselectedMarkerView: unselectedMarkerView,
-            initialCameraZoom: initialCameraZoom,
 
             selectedStrokeColor: selectedStrokeColor,
             unselectedStrokeColor: unselectedStrokeColor,

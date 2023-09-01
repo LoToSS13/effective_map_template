@@ -461,9 +461,9 @@ class _OSMMapState extends State<OSMMap>
   void onClusterTap(BBox bbox) {
     _mapController.animatedFitBounds(
       bbox.toBounds(),
-      options: const FitBoundsOptions(
-        padding: EdgeInsets.all(12),
-        maxZoom: _maxCameraZoom,
+      options: FitBoundsOptions(
+        padding: const EdgeInsets.all(12),
+        maxZoom: widget.maxCameraZoom,
       ),
     );
   }

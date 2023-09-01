@@ -28,8 +28,6 @@ const _initialCameraPosition = MapPosition(
 );
 
 const _initialCameraZoom = 12.5;
-const _markersVisibilityThreshold = 14.67;
-
 const _interactivePolygonVisibilityThreshold = 17.3;
 
 class YandexMap extends StatefulWidget {
@@ -49,13 +47,12 @@ class YandexMap extends StatefulWidget {
   final Marker? selectedMarker;
   final MapObjectWithGeometry? selectedObject;
 
-  final String? urlTemplate;
   final String userAgentPackageName;
   final LatLng? userPosition;
 
   final double interactivePolygonVisibilityThreshold;
   final MapPosition initialCameraPosition;
-  final double initialCameraZoom;
+
   final bool areMarkersVisible;
 
   final Widget? selectedMarkerView;
@@ -78,13 +75,11 @@ class YandexMap extends StatefulWidget {
     this.onMarkerTap,
     this.onObjectTap,
     this.onMapCreate,
-    this.urlTemplate,
     this.isCameraCentredOnUserCallback,
     this.userPosition,
     this.checkVisibleObjects,
     this.selectedMarkerView,
     this.unselectedMarkerView,
-    double? initialCameraZoom,
     double? maxCameraZoom,
     double? minCameraZoom,
     Color? selectedStrokeColor,
@@ -95,8 +90,7 @@ class YandexMap extends StatefulWidget {
     String? userAgentPackageName,
     double? interactivePolygonVisibilityThreshold,
     MapPosition? initialCameraPosition,
-  })  : initialCameraZoom = initialCameraZoom ?? _initialCameraZoom,
-        selectedFillColor =
+  })  : selectedFillColor =
             selectedFillColor ?? PackageColors.selectedFillColor,
         unselectedFillColor = unselectedFillColor ?? PackageColors.fillColor,
         selectedStrokeColor =
@@ -266,7 +260,7 @@ class _YandexMapState extends State<YandexMap>
         tiles: widget.areMarkersVisible || markers.isEmpty
             ? widget.tiles.toYandexTiles()
             : [],
-        onUserLocationAdded: (userLocationView) async =>
+        onUserLocationAdded: (yandex.UserLocationView userLocationView) async =>
             userLocationView.copyWith(
           pin: userLocationView.pin.copyWith(
             opacity: 1,
@@ -300,7 +294,7 @@ class _YandexMapState extends State<YandexMap>
             strokeColor: Colors.transparent,
           ),
         ),
-        onMapCreated: (controller) {
+        onMapCreated: (yandex.YandexMapController controller) {
           _mapController = controller;
 
           _mapController
@@ -382,9 +376,6 @@ class _YandexMapState extends State<YandexMap>
     bool finished,
   ) async {
     resolveIfCameraCenteredOnUser(position.center);
-    if (position.zoom == null || position.zoom! < _markersVisibilityThreshold) {
-      return;
-    }
 
     if (context.mounted) {
       widget.onCameraPositionChanged?.call(position, finished);
@@ -418,7 +409,7 @@ class _YandexMapState extends State<YandexMap>
             latitude: location.latitude,
             longitude: location.longitude,
           ),
-          zoom: max(_interactivePolygonVisibilityThreshold, zoom),
+          zoom: max(widget.interactivePolygonVisibilityThreshold, zoom),
         ),
       ),
       animation: const yandex.MapAnimation(duration: 1),
