@@ -29,31 +29,34 @@ class UserLocationLayer extends StatelessWidget {
                 (style.width + style.borderWidth * 2) * style.devicePixelRatio,
             point: location.toLatLng(),
             builder: (context) => DecoratedBox(
-              decoration: BoxDecoration(
-                color: style.fillColor,
-                shape: BoxShape.circle,
-                boxShadow: isCenteredOnUser
-                    ? style.activeUserLocationShadow
-                    : style.inactiveUserLocationShadow,
-                border: !isCenteredOnUser
-                    ? Border.all(
-                        width: style.borderWidth * style.devicePixelRatio,
-                        color: style.borderColor,
-                      )
-                    : null,
-              ),
-              child: userMarkerViewPath != null
-                  ? Image.asset(
-                      userMarkerViewPath!,
-                      fit: BoxFit.contain,
-                      height: style.height * style.devicePixelRatio,
-                      width: style.width * style.devicePixelRatio,
-                    )
-                  : SizedBox(
-                      height: style.height * style.devicePixelRatio,
-                      width: style.width * style.devicePixelRatio,
-                    ),
-            ),
+                decoration: BoxDecoration(
+                  color: style.fillColor,
+                  shape: BoxShape.circle,
+                  boxShadow: isCenteredOnUser
+                      ? style.activeUserLocationShadow
+                      : style.inactiveUserLocationShadow,
+                  border: !isCenteredOnUser
+                      ? Border.all(
+                          width: style.borderWidth * style.devicePixelRatio,
+                          color: style.borderColor,
+                        )
+                      : null,
+                ),
+                child: SizedBox(
+                  height: style.shadowRadius * 2 * style.devicePixelRatio,
+                  width: style.shadowRadius * 2 * style.devicePixelRatio,
+                  child: userMarkerViewPath != null
+                      ? Image.asset(
+                          userMarkerViewPath!,
+                          fit: BoxFit.contain,
+                          height: style.radius * 2 * style.devicePixelRatio,
+                          width: style.radius * 2 * style.devicePixelRatio,
+                        )
+                      : SizedBox(
+                          height: style.radius * 2 * style.devicePixelRatio,
+                          width: style.radius * 2 * style.devicePixelRatio,
+                        ),
+                )),
           ),
         ],
       );
