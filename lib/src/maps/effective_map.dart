@@ -1,3 +1,4 @@
+import 'package:effective_map/src/models/styles/user_marker_style.dart';
 import 'package:flutter/material.dart';
 
 import 'package:effective_map/src/models/marker.dart';
@@ -45,6 +46,8 @@ class EffectiveMap extends StatelessWidget {
   final double? initialCameraZoom;
   final bool? areMarkersVisible;
 
+  final String? userMarkerViewPath;
+  final UserMarkerStyle? userMarkerStyle;
   final Image? selectedMarkerView;
   final Widget? unselectedMarkerView;
 
@@ -72,6 +75,8 @@ class EffectiveMap extends StatelessWidget {
     this.maxCameraZoom,
     this.minCameraZoom,
     this.userPosition,
+    this.userMarkerViewPath,
+    this.userMarkerStyle,
     this.checkVisibleObjects,
     this.selectedMarkerView,
     this.unselectedMarkerView,
@@ -107,6 +112,8 @@ class EffectiveMap extends StatelessWidget {
             isCameraCentredOnUserCallback: isCameraCentredOnUserCallback,
             checkVisibleObjects: checkVisibleObjects,
             // Customization
+            userMarkerViewPath: userMarkerViewPath,
+            userMarkerStyle: userMarkerStyle,
             selectedMarkerView: selectedMarkerView,
             unselectedMarkerView: unselectedMarkerView,
 

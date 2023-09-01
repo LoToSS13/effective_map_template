@@ -1,77 +1,58 @@
+import 'package:effective_map/src/models/styles/user_marker_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 
-import 'package:effective_map/src/common/constants.dart';
-import 'package:effective_map/src/common/package_colors.dart';
 import 'package:effective_map/src/models/latlng.dart';
 import 'package:effective_map/src/maps/osm/utils/flutter_map_extension.dart';
-
-const inactiveUserLocationShadow = <BoxShadow>[
-  BoxShadow(
-    offset: Offset(0, 6),
-    color: Color.fromRGBO(0, 28, 56, 0.08),
-    blurRadius: 10,
-    spreadRadius: 4,
-  ),
-  BoxShadow(
-    offset: Offset(0, 2),
-    color: Color.fromRGBO(0, 28, 56, 0.16),
-    blurRadius: 3,
-    spreadRadius: 0,
-  ),
-];
-
-const activeUserLocationShadow = <BoxShadow>[
-  BoxShadow(
-    offset: Offset.zero,
-    color: Color.fromRGBO(52, 148, 241, 0.46),
-    blurRadius: 16,
-    spreadRadius: 6,
-  ),
-  BoxShadow(
-    offset: Offset.zero,
-    color: Color.fromRGBO(52, 148, 241, 1),
-    blurRadius: 4.5,
-    spreadRadius: 0,
-  ),
-];
 
 class UserLocationLayer extends StatelessWidget {
   final LatLng location;
   final bool isCenteredOnUser;
+  final String? userMarkerViewPath;
+  final UserMarkerStyle style;
 
   const UserLocationLayer({
     super.key,
     required this.location,
+    required this.style,
     this.isCenteredOnUser = false,
+    this.userMarkerViewPath,
   });
 
   @override
   Widget build(BuildContext context) => MarkerLayer(
         markers: [
           Marker(
-            height: 26,
-            width: 26,
+            height:
+                (style.height + style.borderWidth * 2) * style.devicePixelRatio,
+            width:
+                (style.width + style.borderWidth * 2) * style.devicePixelRatio,
             point: location.toLatLng(),
             builder: (context) => DecoratedBox(
               decoration: BoxDecoration(
+                color: style.fillColor,
                 shape: BoxShape.circle,
                 boxShadow: isCenteredOnUser
-                    ? activeUserLocationShadow
-                    : inactiveUserLocationShadow,
+                    ? style.activeUserLocationShadow
+                    : style.inactiveUserLocationShadow,
                 border: !isCenteredOnUser
                     ? Border.all(
-                        width: 1,
-                        color: PackageColors.borderColor,
+                        width: style.borderWidth * style.devicePixelRatio,
+                        color: style.borderColor,
                       )
                     : null,
               ),
-              child: Image.asset(
-                Constants.userLocationAsset,
-                fit: BoxFit.contain,
-                height: 24,
-                width: 24,
-              ),
+              child: userMarkerViewPath != null
+                  ? Image.asset(
+                      userMarkerViewPath!,
+                      fit: BoxFit.contain,
+                      height: style.height * style.devicePixelRatio,
+                      width: style.width * style.devicePixelRatio,
+                    )
+                  : SizedBox(
+                      height: style.height * style.devicePixelRatio,
+                      width: style.width * style.devicePixelRatio,
+                    ),
             ),
           ),
         ],

@@ -19,7 +19,9 @@ import 'package:effective_map/src/maps/yandex/utils/map_geometry_creator.dart';
 import 'package:effective_map/src/common/number_extractor.dart';
 import 'package:effective_map/src/maps/yandex/utils/placemarks.dart';
 import 'package:effective_map/src/maps/yandex/utils/yandex_map_extension.dart';
+import 'package:effective_map/src/models/styles/user_marker_style.dart';
 import 'package:flutter/material.dart';
+
 import 'package:yandex_mapkit/yandex_mapkit.dart' as yandex;
 
 const _initialCameraPosition = MapPosition(
@@ -57,6 +59,8 @@ class YandexMap extends StatefulWidget {
 
   final Widget? selectedMarkerView;
   final Widget? unselectedMarkerView;
+  final String? userMarkerViewPath;
+  final UserMarkerStyle userMarkerStyle;
 
   final Color selectedStrokeColor;
   final Color unselectedStrokeColor;
@@ -80,6 +84,8 @@ class YandexMap extends StatefulWidget {
     this.checkVisibleObjects,
     this.selectedMarkerView,
     this.unselectedMarkerView,
+    this.userMarkerViewPath,
+    UserMarkerStyle? userMarkerStyle,
     double? maxCameraZoom,
     double? minCameraZoom,
     Color? selectedStrokeColor,
@@ -102,7 +108,8 @@ class YandexMap extends StatefulWidget {
         interactivePolygonVisibilityThreshold =
             interactivePolygonVisibilityThreshold ??
                 _interactivePolygonVisibilityThreshold,
-        initialCameraPosition = initialCameraPosition ?? _initialCameraPosition;
+        initialCameraPosition = initialCameraPosition ?? _initialCameraPosition,
+        userMarkerStyle = userMarkerStyle ?? const UserMarkerStyle();
 
   @override
   State<YandexMap> createState() => _YandexMapState();
@@ -268,7 +275,8 @@ class _YandexMapState extends State<YandexMap>
               yandex.PlacemarkIconStyle(
                 image: yandex.BitmapDescriptor.fromBytes(
                   await drawUserLocation(
-                    devicePixelRatio: _devicePixelRatio,
+                    userMarkerViewPath: widget.userMarkerViewPath,
+                    style: widget.userMarkerStyle,
                   ),
                 ),
                 scale: 1,
@@ -281,7 +289,8 @@ class _YandexMapState extends State<YandexMap>
               yandex.PlacemarkIconStyle(
                 image: yandex.BitmapDescriptor.fromBytes(
                   await drawUserLocation(
-                    devicePixelRatio: _devicePixelRatio,
+                    userMarkerViewPath: widget.userMarkerViewPath,
+                    style: widget.userMarkerStyle,
                   ),
                 ),
                 scale: 1,

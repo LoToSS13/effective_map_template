@@ -1,37 +1,52 @@
-import 'dart:typed_data';
+import 'dart:async';
+
 import 'dart:ui' as ui;
 
+import 'package:effective_map/src/models/styles/user_marker_style.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 Future<Uint8List> drawUserLocation({
-  bool isActive = false,
-  double devicePixelRatio = 1.0,
+  required UserMarkerStyle style,
+  String? userMarkerViewPath,
 }) async {
-  final size = Size(40 * devicePixelRatio, 40 * devicePixelRatio);
+  final size = Size(style.width * style.devicePixelRatio,
+      style.height * style.devicePixelRatio);
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder);
   final circleOffset = Offset(size.height / 2, size.width / 2);
   final fillPaint = Paint()
-    ..color = const Color.fromRGBO(52, 148, 241, 1)
+    ..color = style.fillColor
     ..style = PaintingStyle.fill;
   final strokePaint = Paint()
-    ..color = Colors.white
+    ..color = style.borderColor
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 4 * devicePixelRatio;
+    ..strokeWidth = style.borderWidth * style.devicePixelRatio;
 
-  for (final shadow
-      in isActive ? _activeUserLocationShadow : _inactiveUserLocationShadow) {
+  for (final shadow in style.activeUserLocationShadow) {
     canvas.drawCircle(
       circleOffset.translate(shadow.offset.dx, shadow.offset.dy),
-      isActive ? 12 * devicePixelRatio : 13 * devicePixelRatio,
+      style.shadowRadius * style.devicePixelRatio,
       shadow.toPaint(),
     );
   }
 
   canvas
-    ..drawCircle(circleOffset, 11 * devicePixelRatio, fillPaint)
-    ..drawCircle(circleOffset, 11 * devicePixelRatio, strokePaint);
+    ..drawCircle(circleOffset, style.radius * style.devicePixelRatio, fillPaint)
+    ..drawCircle(
+        circleOffset, style.radius * style.devicePixelRatio, strokePaint);
+
+  if (userMarkerViewPath != null) {
+    final data = await rootBundle.load(userMarkerViewPath);
+    final image = await decodeImageFromList(data.buffer.asUint8List());
+
+    canvas.drawImage(
+      image,
+      Offset(size.height / 2, size.width / 2),
+      Paint(),
+    );
+  }
 
   final image = await recorder
       .endRecording()
@@ -96,33 +111,3 @@ Future<Uint8List> drawClusterWithCount(
 
   return pngBytes!.buffer.asUint8List();
 }
-
-const _inactiveUserLocationShadow = <BoxShadow>[
-  BoxShadow(
-    offset: Offset(0, 6),
-    color: Color.fromRGBO(0, 28, 56, 0.08),
-    blurRadius: 10,
-    spreadRadius: 4,
-  ),
-  BoxShadow(
-    offset: Offset(0, 2),
-    color: Color.fromRGBO(0, 28, 56, 0.16),
-    blurRadius: 3,
-    spreadRadius: 0,
-  ),
-];
-
-const _activeUserLocationShadow = <BoxShadow>[
-  BoxShadow(
-    offset: Offset.zero,
-    color: Color.fromRGBO(52, 148, 241, 0.46),
-    blurRadius: 16,
-    spreadRadius: 6,
-  ),
-  BoxShadow(
-    offset: Offset.zero,
-    color: Color.fromRGBO(52, 148, 241, 1),
-    blurRadius: 4.5,
-    spreadRadius: 0,
-  ),
-];

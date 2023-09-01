@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:effective_map/src/models/styles/user_marker_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map/plugin_api.dart';
@@ -78,8 +79,10 @@ class OSMMap extends StatefulWidget {
   final double initialCameraZoom;
   final bool areMarkersVisible;
 
+  final String? userMarkerViewPath;
   final Widget? selectedMarkerView;
   final Widget? unselectedMarkerView;
+  final UserMarkerStyle userMarkerStyle;
 
   final Color selectedStrokeColor;
   final Color unselectedStrokeColor;
@@ -103,6 +106,8 @@ class OSMMap extends StatefulWidget {
     this.checkVisibleObjects,
     this.selectedMarkerView,
     this.unselectedMarkerView,
+    this.userMarkerViewPath,
+    UserMarkerStyle? userMarkerStyle,
     String? urlTemplate,
     double? initialCameraZoom,
     double? maxCameraZoom,
@@ -120,6 +125,7 @@ class OSMMap extends StatefulWidget {
         minCameraZoom = minCameraZoom ?? _minCameraZoom,
         selectedFillColor =
             selectedFillColor ?? PackageColors.selectedFillColor,
+        userMarkerStyle = userMarkerStyle ?? const UserMarkerStyle(),
         unselectedFillColor = unselectedFillColor ?? PackageColors.fillColor,
         selectedStrokeColor =
             selectedStrokeColor ?? PackageColors.selectedStrokeColor,
@@ -440,6 +446,8 @@ class _OSMMapState extends State<OSMMap>
             UserLocationLayer(
               location: widget.userPosition!,
               isCenteredOnUser: isCameraCentredOnUser,
+              userMarkerViewPath: widget.userMarkerViewPath,
+              style: widget.userMarkerStyle,
             ),
         ],
       );
