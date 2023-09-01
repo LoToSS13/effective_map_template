@@ -1,11 +1,11 @@
 import 'package:meta/meta.dart';
 
-import 'package:effective_map/src/models/effective_latlng.dart';
+import 'package:effective_map/src/models/latlng.dart';
 
 @immutable
 class BBox {
-  final EffectiveLatLng upperCorner;
-  final EffectiveLatLng lowerCorner;
+  final LatLng upperCorner;
+  final LatLng lowerCorner;
 
   const BBox({required this.upperCorner, required this.lowerCorner});
 
@@ -23,7 +23,7 @@ class BBox {
     return false;
   }
 
-  bool includes(EffectiveLatLng latLng) {
+  bool includes(LatLng latLng) {
     if (latLng.latitude >= upperCorner.latitude &&
         latLng.longitude >= upperCorner.longitude &&
         latLng.latitude <= lowerCorner.latitude &&

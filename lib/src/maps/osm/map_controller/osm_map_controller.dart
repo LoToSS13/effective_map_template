@@ -1,24 +1,25 @@
 import 'dart:math';
 
+import 'package:effective_map/src/maps/osm/utils/bbox_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 
 import 'package:effective_map/src/models/bbox.dart';
-import 'package:effective_map/src/models/effective_latlng.dart';
-import 'package:effective_map/src/models/map_controller/effective_map_controller.dart';
-import 'package:effective_map/src/utils/flutter_map_extension.dart';
-import 'package:effective_map/src/utils/bbox_extension.dart';
+import 'package:effective_map/src/models/latlng.dart';
+import 'package:effective_map/src/models/map_controller/map_controller.dart'
+    as mc;
+import 'package:effective_map/src/maps/osm/utils/flutter_map_extension.dart';
 
 const _maxCameraZoom = 19.0;
 const _interactivePolygonVisibilityThreshold = 17.3;
 
-class OSMEffectiveMapController extends EffectiveMapController {
+class OSMMapController extends mc.MapController {
   final AnimatedMapController _controller;
   final double maxCameraZoom;
   final double interactivePolygonVisibilityThreshold;
 
-  OSMEffectiveMapController(
+  OSMMapController(
       {required AnimatedMapController controller,
       this.maxCameraZoom = _maxCameraZoom,
       this.interactivePolygonVisibilityThreshold =
@@ -26,9 +27,10 @@ class OSMEffectiveMapController extends EffectiveMapController {
       : _controller = controller;
 
   @override
-  Future<void> moveTo(EffectiveLatLng latlng) async => _controller.animateTo(
+  Future<void> moveTo(LatLng latlng) async => _controller.animateTo(
         dest: latlng.toLatLng(),
-        zoom: max(interactivePolygonVisibilityThreshold, _controller.zoom),
+        zoom: max(interactivePolygonVisibilityThreshold,
+            _controller.mapController.zoom),
       );
 
   @override
@@ -47,8 +49,8 @@ class OSMEffectiveMapController extends EffectiveMapController {
   Future<void> zoomOut() async => _controller.animatedZoomOut();
 
   @override
-  Future<BBox?> get bbox async => _controller.bounds?.toBBox();
+  Future<BBox?> get bbox async => _controller.mapController.bounds?.toBBox();
 
   @override
-  Future<double> get zoom async => _controller.zoom;
+  Future<double> get zoom async => _controller.mapController.zoom;
 }
