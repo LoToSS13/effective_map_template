@@ -23,10 +23,8 @@ class UserLocationLayer extends StatelessWidget {
   Widget build(BuildContext context) => MarkerLayer(
         markers: [
           Marker(
-            height:
-                (style.height + style.borderWidth * 2) * style.devicePixelRatio,
-            width:
-                (style.width + style.borderWidth * 2) * style.devicePixelRatio,
+            height: style.height * style.devicePixelRatio,
+            width: style.width + style.borderWidth * style.devicePixelRatio,
             point: location.toLatLng(),
             builder: (context) => DecoratedBox(
                 decoration: BoxDecoration(
