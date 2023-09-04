@@ -388,7 +388,7 @@ class _OSMMapState extends State<OSMMap>
             userAgentPackageName: widget.userAgentPackageName,
             tileProvider: CachedTileProvider(),
           ),
-          if (widget.areTilesVisible)
+          if (widget.areTilesVisible && widget.tiles.isNotEmpty)
             TileLayer(
               urlTemplate: widget.tiles.first.baseUrl,
               maxZoom: widget.maxCameraZoom,
@@ -401,7 +401,7 @@ class _OSMMapState extends State<OSMMap>
               userAgentPackageName: widget.userAgentPackageName,
             ),
           ...layers,
-          if (widget.areUserPositionVisible)
+          if (widget.areUserPositionVisible && widget.userPosition != null)
             UserLocationLayer(
               location: widget.userPosition!,
               style: widget.userMarkerStyle,

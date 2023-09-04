@@ -107,19 +107,22 @@ class _MyHomePageState extends State<MyHomePage> {
                 unselectedStrokeColor: Colors.green,
               )),
           ClusterizedMarkerLayer(
-              minZoom: 17,
-              clusterRadius: 50,
+              minZoom: 18,
+              clusterRadius: 30,
               markers: const [
                 Marker(
+                  key: ValueKey(1),
                   position:
                       LatLng(latitude: 54.985981539382834, longitude: 73.372),
                 ),
                 Marker(
+                  key: ValueKey(2),
                   position: LatLng(
                       latitude: 54.98683243800384,
                       longitude: 73.37096804013746),
                 ),
                 Marker(
+                  key: ValueKey(3),
                   position: LatLng(
                       latitude: 54.985981539382834,
                       longitude: 73.37164874229191),
@@ -130,9 +133,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: 40,
                 height: 40,
                 devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
-                radius: 100,
+                radius: 50,
                 markerStyle: MarkerStyle(
                   height: 35,
+                  width: 35,
                   devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
                   unselectedMarkerViewPath: 'assets/pin.png',
                   selectedMarkerViewPath: 'assets/selected_pin.png',
@@ -141,19 +145,24 @@ class _MyHomePageState extends State<MyHomePage> {
           MarkerLayer(
             markers: const [
               Marker(
+                key: ValueKey(11),
                 position: LatLng(latitude: 54.987, longitude: 73.372),
               ),
               Marker(
+                key: ValueKey(12),
                 position:
                     LatLng(latitude: 54.987, longitude: 73.37096804013746),
               ),
               Marker(
+                key: ValueKey(13),
                 position:
                     LatLng(latitude: 54.987, longitude: 73.37164874229191),
               ),
             ],
             style: MarkerStyle(
+              offset: const Offset(0.5, 1),
               height: 35,
+              width: 35,
               devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
               unselectedMarkerViewPath: 'assets/selected_pin.png',
               selectedMarkerViewPath: 'assets/pin.png',

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:effective_map/src/models/bbox.dart';
@@ -14,7 +16,6 @@ import 'package:effective_map/src/maps/yandex/utils/bbox_extension.dart';
 import 'package:effective_map/src/maps/yandex/utils/bounding_box_former.dart';
 import 'package:effective_map/src/maps/yandex/utils/geoobjects_canvas_painter.dart';
 import 'package:effective_map/src/maps/yandex/utils/map_geometry_creator.dart';
-import 'package:effective_map/src/maps/yandex/utils/placemarks.dart';
 import 'package:effective_map/src/maps/yandex/utils/yandex_map_extension.dart';
 import 'package:effective_map/src/models/styles/marker_style.dart';
 import 'package:effective_map/src/models/styles/object_style.dart';
@@ -128,6 +129,7 @@ class _YandexMapState extends State<YandexMap>
             markers.add(yandexObject);
           }
         }
+
         return yandex.MapObjectCollection(
           mapId: yandex.MapObjectId('markers_${markers.hashCode}'),
           mapObjects: markers,
@@ -141,6 +143,7 @@ class _YandexMapState extends State<YandexMap>
             markers.add(yandexObject);
           }
         }
+
         return yandex.ClusterizedPlacemarkCollection(
           mapId: yandex.MapObjectId('clustarized_markers_${markers.hashCode}'),
           placemarks: markers,
@@ -148,6 +151,7 @@ class _YandexMapState extends State<YandexMap>
           minZoom: layer.minZoom,
           onClusterAdded: (self, cluster) async => cluster.copyWith(
             appearance: cluster.appearance.copyWith(
+              isVisible: true,
               opacity: 1,
               icon: yandex.PlacemarkIcon.single(
                 yandex.PlacemarkIconStyle(
@@ -178,9 +182,19 @@ class _YandexMapState extends State<YandexMap>
         mapId: yandex.MapObjectId(packageMarker.key.toString()),
         point: packageMarker.position.toPoint(),
         consumeTapEvents: true,
-        onTap: (placemark, _) => widget.onMarkerTap?.call(packageMarker),
+        onTap: (_, __) => widget.onMarkerTap?.call(packageMarker),
         opacity: 1,
-        icon: generatePlacemarkIcon(selected: packageMarker.selected),
+        icon: yandex.PlacemarkIcon.single(
+          yandex.PlacemarkIconStyle(
+            anchor: style.offset,
+            image: yandex.BitmapDescriptor.fromAssetImage(
+              packageMarker.selected
+                  ? style.selectedMarkerViewPath
+                  : style.unselectedMarkerViewPath,
+            ),
+            scale: min(style.devicePixelRatio / 3, 3),
+          ),
+        ),
       );
 
   @override
