@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:effective_map/src/models/map_controller/map_controller.dart'
     as mc;
 
-import 'package:effective_map/src/maps/osm/view/osm_map.dart';
-import 'package:effective_map/src/maps/yandex/view/yandex_map.dart';
 import 'package:effective_map/src/models/map_position.dart' as mp;
 
 enum MapSample {
