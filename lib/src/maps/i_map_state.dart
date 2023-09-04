@@ -1,4 +1,4 @@
-import 'package:effective_map/src/models/map_layers/i_map_layer.dart';
+import 'package:effective_map/src/models/map_layer.dart';
 import 'package:effective_map/src/models/marker.dart' as marker;
 import 'package:effective_map/src/models/map_object_with_geometry.dart';
 

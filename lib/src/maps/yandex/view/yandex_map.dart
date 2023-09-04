@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:effective_map/src/models/bbox.dart';
-import 'package:effective_map/src/models/map_layers/i_map_layer.dart';
+import 'package:effective_map/src/models/map_layer.dart';
 import 'package:effective_map/src/models/map_position.dart';
 import 'package:effective_map/src/models/marker.dart';
 import 'package:effective_map/src/models/network_tiles_provider.dart';

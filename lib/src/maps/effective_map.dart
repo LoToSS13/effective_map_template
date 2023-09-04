@@ -1,6 +1,4 @@
 import 'package:effective_map/effective_map.dart';
-import 'package:effective_map/src/models/map_layers/i_map_layer.dart';
-import 'package:effective_map/src/models/styles/user_marker_style.dart';
 import 'package:flutter/material.dart';
 
 import 'package:effective_map/src/models/map_controller/map_controller.dart'

@@ -1,4 +1,4 @@
-import 'package:effective_map/src/models/map_layers/i_map_layer.dart' as layer;
+import 'package:effective_map/src/models/map_layer.dart' as layer;
 import 'package:effective_map/src/models/styles/cluster_marker_style.dart';
 import 'package:effective_map/src/models/styles/marker_style.dart';
 import 'package:effective_map/src/models/styles/object_style.dart';

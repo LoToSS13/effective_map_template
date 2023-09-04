@@ -8,3 +8,5 @@ export 'network_tiles_provider.dart';
 export 'map_controller/map_controller.dart';
 export 'map_object_geometry.dart';
 export 'map_object_with_geometry.dart';
+export 'map_layer.dart';
+export 'styles/styles.dart';

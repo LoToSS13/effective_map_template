@@ -1,8 +1,5 @@
 import 'package:effective_map/effective_map.dart';
-import 'package:effective_map/src/models/styles/cluster_marker_style.dart';
 import 'package:effective_map/src/models/styles/i_map_object_style.dart';
-import 'package:effective_map/src/models/styles/marker_style.dart';
-import 'package:effective_map/src/models/styles/object_style.dart';
 
 sealed class MapLayer<T> {
   final List<T> objects;
