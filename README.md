@@ -11,29 +11,20 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages).
 -->
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+This package created for effective work with map, fast customization and simple background changing
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+You can just switch `MapSample` and package will use [flutter_map](https://pub.dev/packages/flutter_map) or [yandex_map_kit](https://pub.dev/packages/yandex_mapkit) based on your choise
 
 ## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+To use `MapSample.yandex` you have to follow this [getting started guide](https://pub.dev/packages/yandex_mapkit#getting-started)
+For another `MapSample` you need to do nothing except import library
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+You can find usege in [example folder](https://github.com/LoToSS13/effective_map_template/tree/main/example/effective_map_example)
 
-```dart
-const like = 'sample';
-```
 
-## Additional information
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
