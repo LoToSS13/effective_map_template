@@ -27,13 +27,9 @@ class ClusterWidget extends StatelessWidget {
               color: style.fillColor,
             ),
             child: Center(
-              child: SizedBox(
-                height: style.radius * style.devicePixelRatio,
-                width: style.radius * style.devicePixelRatio,
-                child: Text(
-                  count.toString(),
-                  style: style.countTextStyle,
-                ),
+              child: Text(
+                count.toString(),
+                style: style.countTextStyle,
               ),
             ),
           ),

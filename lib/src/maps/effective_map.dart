@@ -13,7 +13,9 @@ enum MapSample {
 
 class EffectiveMap extends StatelessWidget {
   /// Using to choose map widget template
+  ///
   /// For [MapSample.yandex] you can use only yandex background
+  ///
   /// Also you have to provide yandex api key for using this sample
   final MapSample mapSample;
 
@@ -35,12 +37,14 @@ class EffectiveMap extends StatelessWidget {
   /// Callback method for when user taps on object
   ///
   /// Works only for [MapSample.yandex]
+  ///
   /// If needed in [MapSample.osm] you have to use [EffectiveMap.onMapTap]
   final void Function(MapObjectWithGeometry object)? onObjectTap;
 
   /// Callback method for when the map is ready to be used.
   ///
   /// Pass to [EffectiveMap.onMapCreate] to receive a [MapController] when the
+  ///
   /// map is created.
   final void Function(mc.MapController controller)? onMapCreate;
 
@@ -51,16 +55,21 @@ class EffectiveMap extends StatelessWidget {
   final List<MapLayer> layers;
 
   /// URL for card background
+  ///
   /// Needs only for [MapSample.osm]
+  ///
   ///[ MapSample.yandex] uses yandex background
   final String? urlTemplate;
 
   /// User agent package name
+  ///
   /// Needs only for [MapSample.osm]
   final String? userAgentPackageName;
 
   /// User position
+  ///
   /// Needs only for [MapSample.osm]
+  ///
   /// [MapSample.yandex] gets user position itself, but you have to handle persmission
   final LatLng? userPosition;
 
@@ -71,10 +80,12 @@ class EffectiveMap extends StatelessWidget {
   final LatLng? initialCameraPosition;
 
   /// Min camera zoom
+  ///
   /// Works only for [MapSample.osm]
   final double? minCameraZoom;
 
   /// Max camera zoom
+  ///
   /// Works only for [MapSample.osm]
   final double? maxCameraZoom;
 

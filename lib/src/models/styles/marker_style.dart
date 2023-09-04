@@ -17,7 +17,6 @@ final class MarkerStyle implements IMapObjectStyle {
     Offset? offset,
     String? selectedMarkerViewPath,
     String? unselectedMarkerViewPath,
-    String? markerViewPath,
     double? devicePixelRatio,
     double? height,
     double? width,
