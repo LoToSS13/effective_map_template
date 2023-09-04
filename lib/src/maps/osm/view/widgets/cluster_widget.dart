@@ -1,39 +1,39 @@
+import 'package:effective_map/src/models/styles/cluster_marker_style.dart';
 import 'package:flutter/material.dart';
 
 class ClusterWidget extends StatelessWidget {
   final int count;
+  final ClusterMarkerStyle style;
 
-  const ClusterWidget({super.key, required this.count});
+  const ClusterWidget({super.key, required this.count, required this.style});
 
   @override
   Widget build(BuildContext context) => Container(
-        height: 38,
-        width: 38,
+        height: style.height * style.devicePixelRatio,
+        width: style.width * style.devicePixelRatio,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(19),
-          gradient: const LinearGradient(
+          borderRadius: BorderRadius.circular(style.radius),
+          gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color.fromRGBO(134, 136, 224, 1),
-              Color.fromRGBO(83, 85, 169, 1),
-            ],
+            colors: style.gradientColors,
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(2.85),
+          padding: EdgeInsets.all(style.borderWidth),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(19),
-              color: Colors.white,
+              borderRadius: BorderRadius.circular(style.radius),
+              color: style.fillColor,
             ),
             child: Center(
-              child: Text(
-                count.toString(),
-                style: Theme.of(context)
-                    .textTheme
-                    .displayMedium
-                    ?.copyWith(color: Colors.black),
+              child: SizedBox(
+                height: style.radius * style.devicePixelRatio,
+                width: style.radius * style.devicePixelRatio,
+                child: Text(
+                  count.toString(),
+                  style: style.countTextStyle,
+                ),
               ),
             ),
           ),

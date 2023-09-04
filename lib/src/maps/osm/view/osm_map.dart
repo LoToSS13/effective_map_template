@@ -1,8 +1,7 @@
-import 'dart:async';
-
-import 'dart:math';
-
-import 'package:collection/collection.dart';
+import 'package:effective_map/src/models/map_layers/i_map_layer.dart' as layer;
+import 'package:effective_map/src/models/styles/cluster_marker_style.dart';
+import 'package:effective_map/src/models/styles/marker_style.dart';
+import 'package:effective_map/src/models/styles/object_style.dart';
 import 'package:effective_map/src/models/styles/user_marker_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -11,8 +10,6 @@ import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
 
-import 'package:effective_map/src/common/constants.dart';
-import 'package:effective_map/src/common/package_colors.dart';
 import 'package:effective_map/src/models/bbox.dart';
 import 'package:effective_map/src/models/map_position.dart' as mp;
 import 'package:effective_map/src/models/marker.dart' as marker;
@@ -32,7 +29,6 @@ import 'package:effective_map/src/maps/i_map_state.dart';
 import 'package:effective_map/src/maps/osm/utils/bbox_extension.dart';
 import 'package:effective_map/src/maps/osm/utils/cached_tile_provider.dart';
 import 'package:effective_map/src/maps/osm/utils/flutter_map_extension.dart';
-import 'package:effective_map/src/common/number_extractor.dart';
 import 'package:effective_map/src/maps/osm/view/widgets/any_map_object_layer.dart';
 import 'package:effective_map/src/maps/osm/view/widgets/cluster_widget.dart';
 import 'package:effective_map/src/maps/osm/view/widgets/user_location_layer.dart';
@@ -55,18 +51,12 @@ class OSMMap extends StatefulWidget {
   final void Function(mp.MapPosition position, bool finished)?
       onCameraPositionChanged;
   final void Function(lat_lng.LatLng latLng)? onMapTap;
+  final void Function(BBox bbox)? onClusterTap;
   final void Function(marker.Marker marker)? onMarkerTap;
-  final void Function(MapObjectWithGeometry object)? onObjectTap;
   final void Function(mc.MapController controller)? onMapCreate;
-  final void Function(bool isCentred)? isCameraCentredOnUserCallback;
-  final void Function()? checkVisibleObjects;
 
   final List<tile.NetworkTileProvider> tiles;
-  final List<marker.Marker> markers;
-  final List<MapObjectWithGeometry> objects;
-
-  final marker.Marker? selectedMarker;
-  final MapObjectWithGeometry? selectedObject;
+  final List<layer.MapLayer> layers;
 
   final String urlTemplate;
   final String userAgentPackageName;
@@ -77,61 +67,39 @@ class OSMMap extends StatefulWidget {
   final double minCameraZoom;
   final double maxCameraZoom;
   final double initialCameraZoom;
-  final bool areMarkersVisible;
 
-  final String? userMarkerViewPath;
-  final Widget? selectedMarkerView;
-  final Widget? unselectedMarkerView;
+  final bool areTilesVisible;
+  final bool areUserPositionVisible;
+
   final UserMarkerStyle userMarkerStyle;
-
-  final Color selectedStrokeColor;
-  final Color unselectedStrokeColor;
-  final Color selectedFillColor;
-  final Color unselectedFillColor;
 
   const OSMMap({
     super.key,
     required this.tiles,
-    required this.markers,
-    required this.objects,
-    this.selectedMarker,
-    this.selectedObject,
+    required this.layers,
     this.onMapTap,
+    this.onClusterTap,
     this.onCameraPositionChanged,
-    this.isCameraCentredOnUserCallback,
     this.onMarkerTap,
-    this.onObjectTap,
     this.onMapCreate,
     this.userPosition,
-    this.checkVisibleObjects,
-    this.selectedMarkerView,
-    this.unselectedMarkerView,
-    this.userMarkerViewPath,
     UserMarkerStyle? userMarkerStyle,
+    ClusterMarkerStyle? clusterMarkerStyle,
     String? urlTemplate,
     double? initialCameraZoom,
     double? maxCameraZoom,
     double? minCameraZoom,
-    Color? selectedStrokeColor,
-    Color? unselectedStrokeColor,
-    Color? selectedFillColor,
-    Color? unselectedFillColor,
-    bool? areMarkersVisible,
+    bool? areTilesVisible,
+    bool? areUserPositionVisible,
     String? userAgentPackageName,
     double? interactivePolygonVisibilityThreshold,
     lat_lng.LatLng? initialCameraPosition,
   })  : initialCameraZoom = initialCameraZoom ?? _initialCameraZoom,
         maxCameraZoom = maxCameraZoom ?? _maxCameraZoom,
         minCameraZoom = minCameraZoom ?? _minCameraZoom,
-        selectedFillColor =
-            selectedFillColor ?? PackageColors.selectedFillColor,
         userMarkerStyle = userMarkerStyle ?? const UserMarkerStyle(),
-        unselectedFillColor = unselectedFillColor ?? PackageColors.fillColor,
-        selectedStrokeColor =
-            selectedStrokeColor ?? PackageColors.selectedStrokeColor,
-        unselectedStrokeColor =
-            unselectedStrokeColor ?? PackageColors.strokeColor,
-        areMarkersVisible = areMarkersVisible ?? false,
+        areTilesVisible = areTilesVisible ?? false,
+        areUserPositionVisible = areUserPositionVisible ?? false,
         userAgentPackageName = userAgentPackageName ?? 'Unknown',
         interactivePolygonVisibilityThreshold =
             interactivePolygonVisibilityThreshold ??
@@ -145,31 +113,14 @@ class OSMMap extends StatefulWidget {
 
 class _OSMMapState extends State<OSMMap>
     with TickerProviderStateMixin
-    implements IMapState<MapObject, Marker> {
+    implements IMapState<MapObject, Marker, Widget> {
   late final AnimatedMapController _mapController =
       AnimatedMapController(vsync: this);
 
-  bool _isCameraCenteredOnUser = false;
-
-  late final List<Marker> _markers = [];
-  late final List<MapObject> _objects = [];
-  late final Marker? _selectedMarker;
-  late final MapObject? _selectedObject;
+  late final List<Widget> _layers = [];
 
   @override
-  List<MapObject> get objects => _objects;
-
-  @override
-  List<Marker> get markers => _markers;
-
-  @override
-  MapObject? get selectedObject => _selectedObject;
-
-  @override
-  Marker? get selectedMarker => _selectedMarker;
-
-  @override
-  bool get isCameraCentredOnUser => _isCameraCenteredOnUser;
+  List<Widget> get layers => _layers;
 
   @override
   void initState() {
@@ -184,65 +135,114 @@ class _OSMMapState extends State<OSMMap>
   }
 
   void _init() {
-    for (final marker in widget.markers) {
-      final flutterMarker = convertMarker(marker);
-      if (flutterMarker != null) {
-        _markers.add(flutterMarker);
+    for (final layer in widget.layers) {
+      final widget = convertLayer(layer);
+      if (widget != null) {
+        _layers.add(widget);
       }
     }
-    for (final object in widget.objects) {
-      final flutterMapObject = convertObject(object);
-      if (flutterMapObject != null) {
-        _objects.add(flutterMapObject);
-      }
-    }
-    _selectedObject = widget.selectedObject != null
-        ? convertObject(widget.selectedObject!, selected: true)
-        : null;
-    _selectedMarker = widget.selectedMarker != null
-        ? convertMarker(widget.selectedMarker!, selected: true)
-        : null;
   }
 
   @override
-  Marker? convertMarker(marker.Marker packageMarker, {bool selected = false}) =>
-      Marker(
-        key: packageMarker.key,
-        height: 56,
-        width: 50,
-        point: packageMarker.position.toLatLng(),
-        anchorPos: AnchorPos.align(AnchorAlign.top),
-        builder: (context) => Align(
-          alignment: Alignment.bottomCenter,
-          child: _resolveMarker(selected),
-        ),
-      );
-
-  Widget _resolveMarker(bool selected) {
-    if (widget.selectedMarkerView != null && selected) {
-      return widget.selectedMarkerView!;
-    }
-    if (widget.unselectedMarkerView != null && !selected) {
-      return widget.unselectedMarkerView!;
-    }
-    return Image.asset(
-      selected ? Constants.selectedPin : Constants.pin,
+  Widget? convertLayer(layer.MapLayer layer) {
+    return layer.mapOrNull<Widget?>(
+      mapObjectLayer: (layer) {
+        final List<MapObject> mapObjects = [];
+        for (final object in layer.objects) {
+          final flutterObject = convertObject(object, layer.style);
+          if (flutterObject != null) {
+            mapObjects.add(flutterObject);
+          }
+        }
+        return AnyMapObjectLayer(mapObjects: mapObjects);
+      },
+      markerLayer: (layer) {
+        final List<Marker> markers = [];
+        for (final marker in layer.objects) {
+          final flutterMarker = convertMarker(marker, layer.style);
+          if (flutterMarker != null) {
+            markers.add(flutterMarker);
+          }
+        }
+        return MarkerLayer(markers: markers);
+      },
+      clusterizedMarkerLayer: (layer) {
+        final List<Marker> markers = [];
+        for (final marker in layer.objects) {
+          final flutterMarker = convertMarker(marker, layer.style.markerStyle);
+          if (flutterMarker != null) {
+            markers.add(flutterMarker);
+          }
+        }
+        return MarkerClusterLayerWidget(
+          options: MarkerClusterLayerOptions(
+            size: Size(layer.style.width, layer.style.height),
+            maxClusterRadius:
+                (layer.clusterRadius * layer.style.devicePixelRatio).toInt(),
+            disableClusteringAtZoom: layer.minZoom,
+            markers: markers,
+            animationsOptions: const AnimationsOptions(
+              zoom: _clusterAnimationsDuration,
+              fitBound: _clusterAnimationsDuration,
+              centerMarker: _clusterAnimationsDuration,
+              spiderfy: _clusterAnimationsDuration,
+            ),
+            spiderfyCluster: false,
+            zoomToBoundsOnClick: false,
+            centerMarkerOnClick: false,
+            onClusterTap: (clusterNode) =>
+                widget.onClusterTap?.call(clusterNode.bounds.toBBox()),
+            onMarkerTap: (marker) =>
+                widget.onMarkerTap?.call(marker.toPackageMarker()),
+            builder: (
+              BuildContext context,
+              List<Marker> markers,
+            ) =>
+                ClusterWidget(
+              count: markers.length,
+              style: layer.style,
+            ),
+          ),
+        );
+      },
     );
   }
 
   @override
-  MapObject? convertObject(MapObjectWithGeometry mapObject,
-          {bool selected = false}) =>
+  Marker? convertMarker(marker.Marker packageMarker, MarkerStyle style) =>
+      Marker(
+        key: packageMarker.key,
+        height: style.height,
+        width: style.width,
+        point: packageMarker.position.toLatLng(),
+        anchorPos: AnchorPos.align(AnchorAlign.top),
+        builder: (context) => GestureDetector(
+          onTap: () => widget.onMarkerTap?.call(packageMarker),
+          child: Align(
+            alignment: Alignment(style.offset.dx, style.offset.dy),
+            child: Image.asset(
+              packageMarker.selected
+                  ? style.selectedMarkerViewPath
+                  : style.unselectedMarkerViewPath,
+            ),
+          ),
+        ),
+      );
+
+  @override
+  MapObject? convertObject(
+          MapObjectWithGeometry mapObject, ObjectStyle style) =>
       mapObject.geometry.mapOrNull(point: (geometry) {
         final circle = CircleMarker(
           point: LatLng(geometry.center.latitude, geometry.center.longitude),
-          radius: 4,
-          borderStrokeWidth: 2,
-          borderColor: selected
-              ? widget.selectedStrokeColor
-              : widget.unselectedStrokeColor,
-          color:
-              selected ? widget.selectedFillColor : widget.unselectedFillColor,
+          radius: style.pointRadius,
+          borderStrokeWidth: style.strokeWidth,
+          borderColor: mapObject.selected
+              ? style.selectedStrokeColor
+              : style.unselectedStrokeColor,
+          color: mapObject.selected
+              ? style.selectedFillColor
+              : style.unselectedFillColor,
         );
         return CircleWrapper(
           id: '${mapObject.id}_circle',
@@ -253,10 +253,10 @@ class _OSMMapState extends State<OSMMap>
           points: geometry.points
               .map((e) => LatLng(e.center.latitude, e.center.longitude))
               .toList(),
-          strokeWidth: 2,
-          color: selected
-              ? widget.selectedStrokeColor
-              : widget.unselectedStrokeColor,
+          strokeWidth: style.strokeWidth,
+          color: mapObject.selected
+              ? style.selectedStrokeColor
+              : style.unselectedStrokeColor,
         );
         return PolylineWrapper(
           id: '${mapObject.id}_polyline',
@@ -270,10 +270,10 @@ class _OSMMapState extends State<OSMMap>
               points: lines.points
                   .map((e) => LatLng(e.center.latitude, e.center.longitude))
                   .toList(),
-              strokeWidth: 2,
-              color: selected
-                  ? widget.selectedStrokeColor
-                  : widget.unselectedStrokeColor,
+              strokeWidth: style.strokeWidth,
+              color: mapObject.selected
+                  ? style.selectedStrokeColor
+                  : style.unselectedStrokeColor,
             ),
           );
         }
@@ -295,12 +295,13 @@ class _OSMMapState extends State<OSMMap>
                 ),
               )
               .toList(),
-          borderColor: selected
-              ? widget.selectedStrokeColor
-              : widget.unselectedStrokeColor,
-          borderStrokeWidth: 2,
-          color:
-              selected ? widget.selectedFillColor : widget.unselectedFillColor,
+          borderColor: mapObject.selected
+              ? style.selectedStrokeColor
+              : style.unselectedStrokeColor,
+          borderStrokeWidth: style.strokeWidth,
+          color: mapObject.selected
+              ? style.selectedFillColor
+              : style.unselectedFillColor,
           isFilled: true,
         );
         return PolygonWrapper(
@@ -324,13 +325,13 @@ class _OSMMapState extends State<OSMMap>
                     ),
                   )
                   .toList(),
-              borderColor: selected
-                  ? widget.selectedStrokeColor
-                  : widget.unselectedStrokeColor,
-              borderStrokeWidth: 2,
-              color: selected
-                  ? widget.selectedFillColor
-                  : widget.unselectedFillColor,
+              borderColor: mapObject.selected
+                  ? style.selectedStrokeColor
+                  : style.unselectedStrokeColor,
+              borderStrokeWidth: style.strokeWidth,
+              color: mapObject.selected
+                  ? style.selectedFillColor
+                  : style.unselectedFillColor,
               isFilled: true,
             ),
           );
@@ -353,14 +354,10 @@ class _OSMMapState extends State<OSMMap>
               InteractiveFlag.drag |
               InteractiveFlag.doubleTapZoom |
               InteractiveFlag.pinchMove,
-          onPositionChanged: (position, hasGesture) =>
-              onCameraPositionChanged(position.toMapPosition(), !hasGesture),
-          onMapEvent: (event) {
-            if (event.source == MapEventSource.dragEnd) {
-              widget.checkVisibleObjects?.call();
-            }
-          },
-          onTap: (position, latLng) => onMapTap(latLng.toLatLng()),
+          onPositionChanged: (position, hasGesture) => widget
+              .onCameraPositionChanged
+              ?.call(position.toMapPosition(), !hasGesture),
+          onTap: (position, latLng) => widget.onMapTap?.call(latLng.toLatLng()),
           onMapReady: () {
             widget.onMapCreate?.call(
               OSMMapController(
@@ -391,8 +388,7 @@ class _OSMMapState extends State<OSMMap>
             userAgentPackageName: widget.userAgentPackageName,
             tileProvider: CachedTileProvider(),
           ),
-          if ((markers.isEmpty || widget.areMarkersVisible) &&
-              widget.tiles.isNotEmpty)
+          if (widget.areTilesVisible)
             TileLayer(
               urlTemplate: widget.tiles.first.baseUrl,
               maxZoom: widget.maxCameraZoom,
@@ -404,132 +400,12 @@ class _OSMMapState extends State<OSMMap>
               ),
               userAgentPackageName: widget.userAgentPackageName,
             ),
-          if (widget.areMarkersVisible) AnyMapObjectLayer(mapObjects: objects),
-          if (selectedObject != null)
-            AnyMapObjectLayer(
-              mapObjects: [selectedObject!],
-            ),
-          if (markers.isNotEmpty && widget.areMarkersVisible)
-            MarkerClusterLayerWidget(
-              options: MarkerClusterLayerOptions(
-                size: const Size(38, 38),
-                maxClusterRadius: 80,
-                disableClusteringAtZoom: 18,
-                markers: markers,
-                animationsOptions: const AnimationsOptions(
-                  zoom: _clusterAnimationsDuration,
-                  fitBound: _clusterAnimationsDuration,
-                  centerMarker: _clusterAnimationsDuration,
-                  spiderfy: _clusterAnimationsDuration,
-                ),
-                spiderfyCluster: false,
-                zoomToBoundsOnClick: false,
-                centerMarkerOnClick: false,
-                onClusterTap: (clusterNode) =>
-                    onClusterTap(clusterNode.bounds.toBBox()),
-                onMarkerTap: onMarkerTap,
-                builder: (
-                  BuildContext context,
-                  List<Marker> markers,
-                ) =>
-                    ClusterWidget(count: markers.length),
-              ),
-            ),
-          if (selectedMarker != null)
-            GestureDetector(
-              onTap: () => onMarkerTap(
-                selectedMarker!,
-              ),
-              child: MarkerLayer(markers: [selectedMarker!]),
-            ),
-          if (widget.userPosition != null)
+          ...layers,
+          if (widget.areUserPositionVisible)
             UserLocationLayer(
               location: widget.userPosition!,
-              isCenteredOnUser: isCameraCentredOnUser,
-              userMarkerViewPath: widget.userMarkerViewPath,
               style: widget.userMarkerStyle,
             ),
         ],
       );
-
-  @override
-  void onCameraPositionChanged(mp.MapPosition position, bool finished) {
-    if (position.center != null) {
-      resolveIfCameraCenteredOnUser(position.center!);
-    }
-    widget.onCameraPositionChanged?.call(position, finished);
-  }
-
-  @override
-  void onMapTap(lat_lng.LatLng latLng) {
-    widget.onMapTap?.call(latLng);
-  }
-
-  @override
-  void onClusterTap(BBox bbox) {
-    _mapController.animatedFitBounds(
-      bbox.toBounds(),
-      options: FitBoundsOptions(
-        padding: const EdgeInsets.all(12),
-        maxZoom: widget.maxCameraZoom,
-      ),
-    );
-  }
-
-  @override
-  void onMarkerTap(Marker marker) {
-    if (_selectedMarker?.key == marker.key) return;
-    moveCameraToLocation(marker.point.toLatLng());
-    widget.onMarkerTap?.call(marker.toEffectiveMarker());
-  }
-
-  @override
-  Future<void> onObjectTap(MapObject mapObject) async {
-    if (selectedObject?.id == mapObject.id) return;
-    unawaited(moveCameraToMatchBBox(mapObject.bounds.toBBox()));
-    final object = widget.objects.firstWhereOrNull((element) =>
-        element.id == extractNumberFromText(mapObject.id.toString()));
-    if (object != null) {
-      widget.onObjectTap?.call(object);
-    }
-  }
-
-  @override
-  Future<void> moveCameraToMatchBBox(BBox bbox) async {
-    await _mapController.animatedFitBounds(
-      bbox.toBounds(),
-      options: FitBoundsOptions(
-        padding: const EdgeInsets.all(12),
-        maxZoom: widget.interactivePolygonVisibilityThreshold,
-      ),
-    );
-    widget.checkVisibleObjects?.call();
-  }
-
-  @override
-  Future<void> moveCameraToLocation(lat_lng.LatLng location) async {
-    await _mapController.animateTo(
-      dest: LatLng(location.latitude, location.longitude),
-      zoom: max(widget.interactivePolygonVisibilityThreshold,
-          _mapController.mapController.zoom),
-    );
-    widget.checkVisibleObjects?.call();
-  }
-
-  @override
-  void resolveIfCameraCenteredOnUser(lat_lng.LatLng center) {
-    var isCentered = false;
-    if (center.latitude.toStringAsFixed(4) ==
-            widget.userPosition?.latitude.toStringAsFixed(4) &&
-        center.longitude.toStringAsFixed(4) ==
-            widget.userPosition?.longitude.toStringAsFixed(4)) {
-      isCentered = true;
-    }
-    if (isCentered != _isCameraCenteredOnUser) {
-      setState(() {
-        _isCameraCenteredOnUser = isCentered;
-        widget.isCameraCentredOnUserCallback?.call(isCentered);
-      });
-    }
-  }
 }

@@ -1,31 +1,14 @@
-import 'dart:async';
-
-import 'package:effective_map/src/models/map_position.dart';
+import 'package:effective_map/src/models/map_layers/i_map_layer.dart';
 import 'package:effective_map/src/models/marker.dart' as marker;
-import 'package:effective_map/src/models/latlng.dart';
 import 'package:effective_map/src/models/map_object_with_geometry.dart';
 
-import 'package:effective_map/src/models/bbox.dart';
+import 'package:effective_map/src/models/styles/marker_style.dart';
+import 'package:effective_map/src/models/styles/object_style.dart';
 
-abstract class IMapState<O, Marker> {
-  void onCameraPositionChanged(MapPosition position, bool finished);
+abstract class IMapState<O, Marker, L> {
+  L? convertLayer(MapLayer layer);
+  O? convertObject(MapObjectWithGeometry mapObject, ObjectStyle style);
+  Marker? convertMarker(marker.Marker effectiveMarker, MarkerStyle style);
 
-  void onMapTap(LatLng latLng);
-  void onClusterTap(BBox bbox);
-  void onMarkerTap(Marker marker);
-  Future<void> onObjectTap(O object);
-
-  Future<void> moveCameraToMatchBBox(BBox bbox);
-  Future<void> moveCameraToLocation(LatLng location);
-
-  void resolveIfCameraCenteredOnUser(LatLng cameraPosition);
-
-  O? convertObject(MapObjectWithGeometry mapObject, {bool selected = false});
-  Marker? convertMarker(marker.Marker effectiveMarker, {bool selected = false});
-
-  O? get selectedObject;
-  Marker? get selectedMarker;
-  bool get isCameraCentredOnUser;
-  List<Marker> get markers;
-  List<O> get objects;
+  List<L> get layers;
 }

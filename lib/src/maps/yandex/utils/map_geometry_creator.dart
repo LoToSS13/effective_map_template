@@ -5,6 +5,9 @@ import 'package:effective_map/src/models/map_object_geometry.dart';
 class MapGeometryCreator {
   const MapGeometryCreator._();
 
+  static Circle createPoint(Point center, double radius) =>
+      Circle(center: center, radius: radius);
+
   static Polyline createPolyline(List<PointObjectGeometry> geometry) =>
       Polyline(
         points: geometry

@@ -8,8 +8,10 @@ typedef ObjectsChunk = List<MapObjectWithGeometry>;
 class MapObjectWithGeometry {
   final String id;
   final MapObjectGeometry geometry;
+  final bool selected;
 
-  const MapObjectWithGeometry({required this.id, required this.geometry});
+  const MapObjectWithGeometry(
+      {required this.id, required this.geometry, this.selected = false});
 
   factory MapObjectWithGeometry.fromJson(Map<String, dynamic> json) =>
       MapObjectWithGeometry(

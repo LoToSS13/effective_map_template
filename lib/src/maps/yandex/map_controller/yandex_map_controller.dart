@@ -36,7 +36,7 @@ class YandexMapController extends MapController {
             latitude: latlng.latitude,
             longitude: latlng.longitude,
           ),
-          zoom: max(_interactivePolygonVisibilityThreshold, zoom),
+          zoom: max(interactivePolygonVisibilityThreshold, zoom),
         ),
       ),
       animation: const yandex.MapAnimation(duration: 1),

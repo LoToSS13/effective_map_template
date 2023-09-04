@@ -22,6 +22,6 @@ extension PackageLatLngConverter on lat_lng.LatLng {
 }
 
 extension FlutterMarkerConverter on Marker {
-  marker.Marker toEffectiveMarker() =>
+  marker.Marker toPackageMarker() =>
       marker.Marker(key: key, position: point.toLatLng());
 }

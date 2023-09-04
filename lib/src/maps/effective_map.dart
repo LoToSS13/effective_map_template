@@ -1,165 +1,178 @@
+import 'package:effective_map/effective_map.dart';
+import 'package:effective_map/src/models/map_layers/i_map_layer.dart';
 import 'package:effective_map/src/models/styles/user_marker_style.dart';
 import 'package:flutter/material.dart';
 
-import 'package:effective_map/src/models/marker.dart';
-import 'package:effective_map/src/models/network_tiles_provider.dart';
-import 'package:effective_map/src/models/latlng.dart';
 import 'package:effective_map/src/models/map_controller/map_controller.dart'
     as mc;
-import 'package:effective_map/src/models/map_object_with_geometry.dart';
+
 import 'package:effective_map/src/maps/osm/view/osm_map.dart';
 import 'package:effective_map/src/maps/yandex/view/yandex_map.dart';
 import 'package:effective_map/src/models/map_position.dart' as mp;
 
-enum MapSamples {
+enum MapSample {
   yandex,
   osm,
 }
 
 class EffectiveMap extends StatelessWidget {
-  final MapSamples mapSample;
+  /// Using to choose map widget template
+  /// For [MapSample.yandex] you can use only yandex background
+  /// Also you have to provide yandex api key for using this sample
+  final MapSample mapSample;
 
+  /// Callback method for when user changes camera position
   final void Function(mp.MapPosition position, bool finished)?
       onCameraPositionChanged;
+
+  /// Callback method for when user taps on map
+  ///
+  /// Use instead of [EffectiveMap.onObjectTap] for [MapSample.osm] and handle it by received object position
   final void Function(LatLng latLng)? onMapTap;
+
+  /// Callback method for when user taps on cluster
+  final void Function(BBox bbox)? onClusterTap;
+
+  /// Callback method for when user taps on marker
   final void Function(Marker marker)? onMarkerTap;
+
+  /// Callback method for when user taps on object
+  ///
+  /// Works only for [MapSample.yandex]
+  /// If needed in [MapSample.osm] you have to use [EffectiveMap.onMapTap]
   final void Function(MapObjectWithGeometry object)? onObjectTap;
+
+  /// Callback method for when the map is ready to be used.
+  ///
+  /// Pass to [EffectiveMap.onMapCreate] to receive a [MapController] when the
+  /// map is created.
   final void Function(mc.MapController controller)? onMapCreate;
-  final void Function(bool isCentred)? isCameraCentredOnUserCallback;
-  final void Function()? checkVisibleObjects;
 
+  /// Your tiles to show on map
   final List<NetworkTileProvider> tiles;
-  final List<Marker> markers;
-  final List<MapObjectWithGeometry> objects;
 
-  final Marker? selectedMarker;
-  final MapObjectWithGeometry? selectedObject;
+  /// Your layers to show on map
+  final List<MapLayer> layers;
 
+  /// URL for card background
+  /// Needs only for [MapSample.osm]
+  ///[ MapSample.yandex] uses yandex background
   final String? urlTemplate;
+
+  /// User agent package name
+  /// Needs only for [MapSample.osm]
   final String? userAgentPackageName;
+
+  /// User position
+  /// Needs only for [MapSample.osm]
+  /// [MapSample.yandex] gets user position itself, but you have to handle persmission
   final LatLng? userPosition;
 
+  /// Maximum zoom when using [MapController.moveTo]
   final double? interactivePolygonVisibilityThreshold;
+
+  /// Initial camera position
   final LatLng? initialCameraPosition;
+
+  /// Min camera zoom
+  /// Works only for [MapSample.osm]
   final double? minCameraZoom;
+
+  /// Max camera zoom
+  /// Works only for [MapSample.osm]
   final double? maxCameraZoom;
+
+  /// Initial camera zoom
   final double? initialCameraZoom;
-  final bool? areMarkersVisible;
 
-  final String? userMarkerViewPath;
+  /// Are tiles visible on map
+  final bool? areTilesVisible;
+
+  /// Are user position visible on map
+  final bool? areUserPositionVisible;
+
+  /// Customization of user marker object on map
   final UserMarkerStyle? userMarkerStyle;
-  final Image? selectedMarkerView;
-  final Widget? unselectedMarkerView;
 
-  final Color? selectedStrokeColor;
-  final Color? unselectedStrokeColor;
-  final Color? selectedFillColor;
-  final Color? unselectedFillColor;
-
-  const EffectiveMap({
-    super.key,
-    required this.mapSample,
-    this.markers = const [],
+  const EffectiveMap(
+    this.mapSample, {
     this.tiles = const [],
-    this.objects = const [],
+    this.layers = const [],
     this.onMapCreate,
     this.onMapTap,
     this.onCameraPositionChanged,
     this.urlTemplate,
-    this.selectedMarker,
-    this.selectedObject,
     this.onMarkerTap,
-    this.onObjectTap,
-    this.isCameraCentredOnUserCallback,
     this.initialCameraZoom,
     this.maxCameraZoom,
     this.minCameraZoom,
     this.userPosition,
-    this.userMarkerViewPath,
     this.userMarkerStyle,
-    this.checkVisibleObjects,
-    this.selectedMarkerView,
-    this.unselectedMarkerView,
-    this.selectedStrokeColor,
-    this.unselectedStrokeColor,
-    this.selectedFillColor,
-    this.unselectedFillColor,
-    this.areMarkersVisible,
     this.userAgentPackageName,
     this.interactivePolygonVisibilityThreshold,
     this.initialCameraPosition,
+    this.areTilesVisible,
+    this.onClusterTap,
+    this.areUserPositionVisible,
+    this.onObjectTap,
+    super.key,
   });
 
   @override
   Widget build(BuildContext context) => switch (mapSample) {
-        MapSamples.yandex => YandexMap(
-            // Data
+        MapSample.yandex => YandexMap(
+            //Data
             tiles: tiles,
+            layers: layers,
 
-            userAgentPackageName: userAgentPackageName,
-            markers: markers,
-            objects: objects,
-            selectedMarker: selectedMarker,
-            selectedObject: selectedObject,
-            userPosition: userPosition,
-            areMarkersVisible: areMarkersVisible,
-            // Functions
+            //Functions
+            onCameraPositionChanged: onCameraPositionChanged,
+            onMapTap: onMapTap,
+            onClusterTap: onClusterTap,
             onMarkerTap: onMarkerTap,
             onObjectTap: onObjectTap,
-            onMapTap: onMapTap,
-            onCameraPositionChanged: onCameraPositionChanged,
             onMapCreate: onMapCreate,
-            isCameraCentredOnUserCallback: isCameraCentredOnUserCallback,
-            checkVisibleObjects: checkVisibleObjects,
-            // Customization
-            userMarkerViewPath: userMarkerViewPath,
-            userMarkerStyle: userMarkerStyle,
-            selectedMarkerView: selectedMarkerView,
-            unselectedMarkerView: unselectedMarkerView,
 
-            selectedStrokeColor: selectedStrokeColor,
-            unselectedStrokeColor: unselectedStrokeColor,
-            selectedFillColor: selectedFillColor,
-            unselectedFillColor: unselectedFillColor,
+            //Customization
             interactivePolygonVisibilityThreshold:
                 interactivePolygonVisibilityThreshold,
+            userMarkerStyle: userMarkerStyle,
             initialCameraPosition: mp.MapPosition(
               center: initialCameraPosition,
               zoom: initialCameraZoom,
             ),
+
+            //Flags
+            areTilesVisible: areTilesVisible,
+            areUserLocationVisible: areUserPositionVisible,
           ),
-        MapSamples.osm => OSMMap(
-            // Data
+        MapSample.osm => OSMMap(
+            //Data
             tiles: tiles,
-            urlTemplate: urlTemplate,
+            layers: layers,
             userAgentPackageName: userAgentPackageName,
-            markers: markers,
-            objects: objects,
-            selectedMarker: selectedMarker,
-            selectedObject: selectedObject,
             userPosition: userPosition,
-            areMarkersVisible: areMarkersVisible,
-            // Functions
-            onMarkerTap: onMarkerTap,
-            onObjectTap: onObjectTap,
-            onMapTap: onMapTap,
+
+            //Functions
             onCameraPositionChanged: onCameraPositionChanged,
+            onMapTap: onMapTap,
+            onClusterTap: onClusterTap,
+            onMarkerTap: onMarkerTap,
             onMapCreate: onMapCreate,
-            isCameraCentredOnUserCallback: isCameraCentredOnUserCallback,
-            checkVisibleObjects: checkVisibleObjects,
-            // Customization
-            selectedMarkerView: selectedMarkerView,
-            unselectedMarkerView: unselectedMarkerView,
-            initialCameraZoom: initialCameraZoom,
-            maxCameraZoom: maxCameraZoom,
-            minCameraZoom: minCameraZoom,
-            selectedStrokeColor: selectedStrokeColor,
-            unselectedStrokeColor: unselectedStrokeColor,
-            selectedFillColor: selectedFillColor,
-            unselectedFillColor: unselectedFillColor,
+            urlTemplate: urlTemplate,
+
+            //Customization
             interactivePolygonVisibilityThreshold:
                 interactivePolygonVisibilityThreshold,
             initialCameraPosition: initialCameraPosition,
+            minCameraZoom: minCameraZoom,
+            maxCameraZoom: maxCameraZoom,
+            initialCameraZoom: initialCameraZoom,
+            userMarkerStyle: userMarkerStyle,
+
+            // Flags
+            areTilesVisible: areTilesVisible,
+            areUserPositionVisible: areUserPositionVisible,
           ),
       };
 }

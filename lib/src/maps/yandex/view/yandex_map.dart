@@ -1,9 +1,7 @@
-import 'dart:async';
-import 'dart:math';
+import 'package:flutter/material.dart';
 
-import 'package:collection/collection.dart';
-import 'package:effective_map/src/common/package_colors.dart';
 import 'package:effective_map/src/models/bbox.dart';
+import 'package:effective_map/src/models/map_layers/i_map_layer.dart';
 import 'package:effective_map/src/models/map_position.dart';
 import 'package:effective_map/src/models/marker.dart';
 import 'package:effective_map/src/models/network_tiles_provider.dart';
@@ -16,11 +14,11 @@ import 'package:effective_map/src/maps/yandex/utils/bbox_extension.dart';
 import 'package:effective_map/src/maps/yandex/utils/bounding_box_former.dart';
 import 'package:effective_map/src/maps/yandex/utils/geoobjects_canvas_painter.dart';
 import 'package:effective_map/src/maps/yandex/utils/map_geometry_creator.dart';
-import 'package:effective_map/src/common/number_extractor.dart';
 import 'package:effective_map/src/maps/yandex/utils/placemarks.dart';
 import 'package:effective_map/src/maps/yandex/utils/yandex_map_extension.dart';
+import 'package:effective_map/src/models/styles/marker_style.dart';
+import 'package:effective_map/src/models/styles/object_style.dart';
 import 'package:effective_map/src/models/styles/user_marker_style.dart';
-import 'package:flutter/material.dart';
 
 import 'package:yandex_mapkit/yandex_mapkit.dart' as yandex;
 
@@ -36,75 +34,39 @@ class YandexMap extends StatefulWidget {
   final void Function(MapPosition position, bool finished)?
       onCameraPositionChanged;
   final void Function(LatLng latLng)? onMapTap;
+  final void Function(BBox bbox)? onClusterTap;
   final void Function(Marker marker)? onMarkerTap;
   final void Function(MapObjectWithGeometry object)? onObjectTap;
   final void Function(MapController controller)? onMapCreate;
-  final void Function(bool isCentred)? isCameraCentredOnUserCallback;
-  final void Function()? checkVisibleObjects;
 
   final List<NetworkTileProvider> tiles;
-  final List<Marker> markers;
-  final List<MapObjectWithGeometry> objects;
-
-  final Marker? selectedMarker;
-  final MapObjectWithGeometry? selectedObject;
-
-  final String userAgentPackageName;
-  final LatLng? userPosition;
+  final List<MapLayer> layers;
 
   final double interactivePolygonVisibilityThreshold;
   final MapPosition initialCameraPosition;
 
-  final bool areMarkersVisible;
+  final bool areTilesVisible;
+  final bool areUserLocationVisible;
 
-  final Widget? selectedMarkerView;
-  final Widget? unselectedMarkerView;
-  final String? userMarkerViewPath;
   final UserMarkerStyle userMarkerStyle;
-
-  final Color selectedStrokeColor;
-  final Color unselectedStrokeColor;
-  final Color selectedFillColor;
-  final Color unselectedFillColor;
 
   const YandexMap({
     super.key,
     required this.tiles,
-    required this.markers,
-    required this.objects,
-    this.selectedMarker,
-    this.selectedObject,
+    required this.layers,
     this.onMapTap,
     this.onCameraPositionChanged,
     this.onMarkerTap,
     this.onObjectTap,
+    this.onClusterTap,
     this.onMapCreate,
-    this.isCameraCentredOnUserCallback,
-    this.userPosition,
-    this.checkVisibleObjects,
-    this.selectedMarkerView,
-    this.unselectedMarkerView,
-    this.userMarkerViewPath,
     UserMarkerStyle? userMarkerStyle,
-    double? maxCameraZoom,
-    double? minCameraZoom,
-    Color? selectedStrokeColor,
-    Color? unselectedStrokeColor,
-    Color? selectedFillColor,
-    Color? unselectedFillColor,
-    bool? areMarkersVisible,
-    String? userAgentPackageName,
+    bool? areTilesVisible,
+    bool? areUserLocationVisible,
     double? interactivePolygonVisibilityThreshold,
     MapPosition? initialCameraPosition,
-  })  : selectedFillColor =
-            selectedFillColor ?? PackageColors.selectedFillColor,
-        unselectedFillColor = unselectedFillColor ?? PackageColors.fillColor,
-        selectedStrokeColor =
-            selectedStrokeColor ?? PackageColors.selectedStrokeColor,
-        unselectedStrokeColor =
-            unselectedStrokeColor ?? PackageColors.strokeColor,
-        areMarkersVisible = areMarkersVisible ?? false,
-        userAgentPackageName = userAgentPackageName ?? 'Unknown',
+  })  : areTilesVisible = areTilesVisible ?? false,
+        areUserLocationVisible = areUserLocationVisible ?? false,
         interactivePolygonVisibilityThreshold =
             interactivePolygonVisibilityThreshold ??
                 _interactivePolygonVisibilityThreshold,
@@ -116,30 +78,15 @@ class YandexMap extends StatefulWidget {
 }
 
 class _YandexMapState extends State<YandexMap>
-    implements IMapState<yandex.MapObject<dynamic>, yandex.PlacemarkMapObject> {
+    implements
+        IMapState<yandex.MapObject<dynamic>, yandex.PlacemarkMapObject,
+            yandex.MapObject<dynamic>> {
   late final yandex.YandexMapController _mapController;
 
-  bool _isCameraCenteredOnUser = false;
-
-  late final List<yandex.PlacemarkMapObject> _markers = [];
-  late final List<yandex.MapObject<dynamic>> _objects = [];
-  late final yandex.PlacemarkMapObject? _selectedMarker;
-  late final yandex.MapObject<dynamic>? _selectedObject;
+  late final List<yandex.MapObject<dynamic>> _layers = [];
 
   @override
-  bool get isCameraCentredOnUser => _isCameraCenteredOnUser;
-
-  @override
-  List<yandex.PlacemarkMapObject> get markers => _markers;
-
-  @override
-  yandex.PlacemarkMapObject? get selectedMarker => _selectedMarker;
-
-  @override
-  yandex.MapObject<dynamic>? get selectedObject => _selectedObject;
-
-  @override
-  List<yandex.MapObject<dynamic>> get objects => _objects;
+  List<yandex.MapObject<dynamic>> get layers => _layers;
 
   @override
   void initState() {
@@ -148,57 +95,128 @@ class _YandexMapState extends State<YandexMap>
   }
 
   void _init() {
-    for (final marker in widget.markers) {
-      final flutterMarker = convertMarker(marker);
-      if (flutterMarker != null) {
-        _markers.add(flutterMarker);
+    for (final layer in widget.layers) {
+      final widget = convertLayer(layer);
+      if (widget != null) {
+        _layers.add(widget);
       }
     }
-    for (final object in widget.objects) {
-      final flutterMapObject = convertObject(object);
-      if (flutterMapObject != null) {
-        _objects.add(flutterMapObject);
-      }
-    }
-    _selectedObject = widget.selectedObject != null
-        ? convertObject(widget.selectedObject!, selected: true)
-        : null;
-    _selectedMarker = widget.selectedMarker != null
-        ? convertMarker(widget.selectedMarker!, selected: true)
-        : null;
   }
 
   @override
-  yandex.PlacemarkMapObject? convertMarker(Marker packageMarker,
-          {bool selected = false}) =>
+  yandex.MapObject? convertLayer(MapLayer layer) {
+    return layer.mapOrNull<yandex.MapObject?>(
+      mapObjectLayer: (layer) {
+        final List<yandex.MapObject> objects = [];
+        for (final object in layer.objects) {
+          final yandexObject = convertObject(object, layer.style);
+          if (yandexObject != null) {
+            objects.add(yandexObject);
+          }
+        }
+
+        return yandex.MapObjectCollection(
+          mapId: yandex.MapObjectId('map_objects_${objects.hashCode}'),
+          mapObjects: objects,
+        );
+      },
+      markerLayer: (layer) {
+        final List<yandex.PlacemarkMapObject> markers = [];
+        for (final object in layer.objects) {
+          final yandexObject = convertMarker(object, layer.style);
+          if (yandexObject != null) {
+            markers.add(yandexObject);
+          }
+        }
+        return yandex.MapObjectCollection(
+          mapId: yandex.MapObjectId('markers_${markers.hashCode}'),
+          mapObjects: markers,
+        );
+      },
+      clusterizedMarkerLayer: (layer) {
+        final List<yandex.PlacemarkMapObject> markers = [];
+        for (final object in layer.objects) {
+          final yandexObject = convertMarker(object, layer.style.markerStyle);
+          if (yandexObject != null) {
+            markers.add(yandexObject);
+          }
+        }
+        return yandex.ClusterizedPlacemarkCollection(
+          mapId: yandex.MapObjectId('clustarized_markers_${markers.hashCode}'),
+          placemarks: markers,
+          radius: layer.clusterRadius,
+          minZoom: layer.minZoom,
+          onClusterAdded: (self, cluster) async => cluster.copyWith(
+            appearance: cluster.appearance.copyWith(
+              opacity: 1,
+              icon: yandex.PlacemarkIcon.single(
+                yandex.PlacemarkIconStyle(
+                  image: yandex.BitmapDescriptor.fromBytes(
+                    await drawCluster(
+                      cluster,
+                      style: layer.style,
+                    ),
+                  ),
+                  scale: 1,
+                ),
+              ),
+            ),
+          ),
+          onClusterTap: (self, cluster) => widget.onClusterTap?.call(
+              createPaddedBoundingBoxFrom(
+                      cluster.placemarks.map((e) => e.point).toList())
+                  .toBBox()),
+        );
+      },
+    );
+  }
+
+  @override
+  yandex.PlacemarkMapObject? convertMarker(
+          Marker packageMarker, MarkerStyle style) =>
       yandex.PlacemarkMapObject(
         mapId: yandex.MapObjectId(packageMarker.key.toString()),
         point: packageMarker.position.toPoint(),
         consumeTapEvents: true,
-        onTap: (placemark, _) => onMarkerTap(placemark),
+        onTap: (placemark, _) => widget.onMarkerTap?.call(packageMarker),
         opacity: 1,
-        icon: generatePlacemarkIcon(selected: selected),
+        icon: generatePlacemarkIcon(selected: packageMarker.selected),
       );
 
   @override
-  yandex.MapObject<dynamic>? convertObject(MapObjectWithGeometry mapObject,
-          {bool selected = false}) =>
+  yandex.MapObject<dynamic>? convertObject(
+          MapObjectWithGeometry mapObject, ObjectStyle style) =>
       mapObject.geometry.mapOrNull<yandex.MapObject<dynamic>>(
+        point: (point) => yandex.CircleMapObject(
+          mapId: yandex.MapObjectId('${mapObject.id}_point'),
+          circle: MapGeometryCreator.createPoint(
+              point.center.toPoint(), style.pointRadius),
+          zIndex: mapObject.selected ? 1 : 0,
+          onTap: (object, _) => widget.onObjectTap?.call(mapObject),
+          consumeTapEvents: true,
+          strokeColor: mapObject.selected
+              ? style.selectedStrokeColor
+              : style.unselectedStrokeColor,
+          fillColor: mapObject.selected
+              ? style.selectedFillColor
+              : style.unselectedFillColor,
+          strokeWidth: style.strokeWidth,
+        ),
         line: (line) => yandex.PolylineMapObject(
           mapId: yandex.MapObjectId('${mapObject.id}_line'),
           polyline: MapGeometryCreator.createPolyline(line.points),
-          strokeWidth: 1,
+          strokeWidth: style.strokeWidth,
           turnRadius: 0,
-          zIndex: selected ? 1 : 0,
-          strokeColor: selected
-              ? widget.selectedStrokeColor
-              : widget.unselectedStrokeColor,
-          onTap: (object, _) => onObjectTap(object),
+          zIndex: mapObject.selected ? 1 : 0,
+          strokeColor: mapObject.selected
+              ? style.selectedStrokeColor
+              : style.unselectedStrokeColor,
+          onTap: (object, _) => widget.onObjectTap?.call(mapObject),
         ),
         multiline: (multiline) => yandex.MapObjectCollection(
           mapId: yandex.MapObjectId('${mapObject.id}_multiline'),
-          onTap: (object, _) => onObjectTap(object),
-          zIndex: selected ? 1 : 0,
+          onTap: (object, _) => widget.onObjectTap?.call(mapObject),
+          zIndex: mapObject.selected ? 1 : 0,
           mapObjects: multiline.lines
               .map(
                 (e) => yandex.PolylineMapObject(
@@ -207,31 +225,33 @@ class _YandexMapState extends State<YandexMap>
                   polyline: MapGeometryCreator.createPolyline(e.points),
                   strokeWidth: 1,
                   turnRadius: 0,
-                  strokeColor: selected
-                      ? widget.selectedStrokeColor
-                      : widget.unselectedStrokeColor,
+                  strokeColor: mapObject.selected
+                      ? style.selectedStrokeColor
+                      : style.unselectedStrokeColor,
                 ),
               )
               .toList(),
         ),
         polygon: (polygon) => yandex.PolygonMapObject(
           mapId: yandex.MapObjectId('${mapObject.id}_polygon'),
-          zIndex: selected ? 1 : 0,
+          zIndex: mapObject.selected ? 1 : 0,
           polygon: MapGeometryCreator.createPolygon(
             polygon.outerRing,
             polygon.innerRings ?? [],
           ),
-          strokeColor: selected
-              ? widget.selectedStrokeColor
-              : widget.unselectedStrokeColor,
-          fillColor:
-              selected ? widget.selectedFillColor : widget.unselectedFillColor,
-          onTap: (object, _) => onObjectTap(object),
+          strokeWidth: style.strokeWidth,
+          strokeColor: mapObject.selected
+              ? style.selectedStrokeColor
+              : style.unselectedStrokeColor,
+          fillColor: mapObject.selected
+              ? style.selectedFillColor
+              : style.unselectedFillColor,
+          onTap: (object, _) => widget.onObjectTap?.call(mapObject),
         ),
         multipolygon: (multipolygon) => yandex.MapObjectCollection(
           mapId: yandex.MapObjectId('${mapObject.id}_multipolygon'),
-          zIndex: selected ? 1 : 0,
-          onTap: (object, _) => onObjectTap(object),
+          zIndex: mapObject.selected ? 1 : 0,
+          onTap: (object, _) => widget.onObjectTap?.call(mapObject),
           mapObjects: multipolygon.polygons
               .map(
                 (e) => yandex.PolygonMapObject(
@@ -241,12 +261,13 @@ class _YandexMapState extends State<YandexMap>
                     e.outerRing,
                     e.innerRings ?? [],
                   ),
-                  strokeColor: selected
-                      ? widget.selectedStrokeColor
-                      : widget.unselectedStrokeColor,
-                  fillColor: selected
-                      ? widget.selectedFillColor
-                      : widget.unselectedFillColor,
+                  strokeWidth: style.strokeWidth,
+                  strokeColor: mapObject.selected
+                      ? style.selectedStrokeColor
+                      : style.unselectedStrokeColor,
+                  fillColor: mapObject.selected
+                      ? style.selectedFillColor
+                      : style.unselectedFillColor,
                 ),
               )
               .toList(),
@@ -264,32 +285,29 @@ class _YandexMapState extends State<YandexMap>
         tiltGesturesEnabled: false,
         rotateGesturesEnabled: false,
         mode2DEnabled: true,
-        tiles: widget.areMarkersVisible || markers.isEmpty
-            ? widget.tiles.toYandexTiles()
-            : [],
+        tiles: widget.areTilesVisible ? widget.tiles.toYandexTiles() : [],
         onUserLocationAdded: (yandex.UserLocationView userLocationView) async =>
             userLocationView.copyWith(
           pin: userLocationView.pin.copyWith(
-            opacity: 1,
-            icon: yandex.PlacemarkIcon.single(
-              yandex.PlacemarkIconStyle(
-                image: yandex.BitmapDescriptor.fromBytes(
-                  await drawUserLocation(
-                    userMarkerViewPath: widget.userMarkerViewPath,
-                    style: widget.userMarkerStyle,
+              opacity: 1,
+              icon: yandex.PlacemarkIcon.single(
+                yandex.PlacemarkIconStyle(
+                  image: yandex.BitmapDescriptor.fromBytes(
+                    await drawUserLocation(
+                      style: widget.userMarkerStyle,
+                    ),
                   ),
+                  scale: 1,
                 ),
-                scale: 1,
               ),
-            ),
-          ),
+              isVisible: widget.areUserLocationVisible),
           arrow: userLocationView.arrow.copyWith(
             opacity: 1,
+            isVisible: widget.areUserLocationVisible,
             icon: yandex.PlacemarkIcon.single(
               yandex.PlacemarkIconStyle(
                 image: yandex.BitmapDescriptor.fromBytes(
                   await drawUserLocation(
-                    userMarkerViewPath: widget.userMarkerViewPath,
                     style: widget.userMarkerStyle,
                   ),
                 ),
@@ -319,125 +337,10 @@ class _YandexMapState extends State<YandexMap>
                 widget.interactivePolygonVisibilityThreshold,
           ));
         },
-        onMapTap: (point) => onMapTap(point.toLatLng()),
-        mapObjects: [
-          if (widget.areMarkersVisible)
-            yandex.ClusterizedPlacemarkCollection(
-              mapId: const yandex.MapObjectId('excavation_cluster'),
-              placemarks: markers,
-              radius: 30,
-              minZoom: 18,
-              onClusterAdded: (self, cluster) async => cluster.copyWith(
-                appearance: cluster.appearance.copyWith(
-                  opacity: 1,
-                  icon: yandex.PlacemarkIcon.single(
-                    yandex.PlacemarkIconStyle(
-                      image: yandex.BitmapDescriptor.fromBytes(
-                        await drawCluster(
-                          cluster,
-                          devicePixelRatio: _devicePixelRatio,
-                        ),
-                      ),
-                      scale: 1,
-                    ),
-                  ),
-                ),
-              ),
-              onClusterTap: (self, cluster) => onClusterTap(
-                  createPaddedBoundingBoxFrom(
-                          cluster.placemarks.map((e) => e.point).toList())
-                      .toBBox()),
-            ),
-          if (widget.areMarkersVisible) ...objects,
-        ],
-        onCameraPositionChanged: (position, _, finished) =>
-            onCameraPositionChanged(position.toMapPosition(), finished),
+        onMapTap: (point) => widget.onMapTap?.call(point.toLatLng()),
+        mapObjects: layers,
+        onCameraPositionChanged: (position, _, finished) => widget
+            .onCameraPositionChanged
+            ?.call(position.toMapPosition(), finished),
       );
-
-  double get _devicePixelRatio => MediaQuery.of(context).devicePixelRatio;
-
-  @override
-  void onMarkerTap(yandex.PlacemarkMapObject marker) {
-    if (selectedMarker == marker.mapId) return;
-    moveCameraToLocation(marker.point.toLatLng());
-    widget.onMarkerTap?.call(marker.toMarker());
-  }
-
-  @override
-  Future<void> onObjectTap(yandex.MapObject<dynamic> mapObject) async {
-    if ((await _mapController.getCameraPosition()).zoom <
-        widget.interactivePolygonVisibilityThreshold) return;
-    final object = widget.objects.firstWhereOrNull(
-      (element) =>
-          element.id ==
-          extractNumberFromText(
-            mapObject.mapId.value,
-          ),
-    );
-    if (object != null) {
-      widget.onObjectTap?.call(object);
-    }
-  }
-
-  @override
-  Future<void> onCameraPositionChanged(
-    MapPosition position,
-    bool finished,
-  ) async {
-    resolveIfCameraCenteredOnUser(position.center);
-
-    if (context.mounted) {
-      widget.onCameraPositionChanged?.call(position, finished);
-    }
-  }
-
-  @override
-  void resolveIfCameraCenteredOnUser(LatLng? position) {
-    var isCentered = false;
-    if (position?.latitude.toStringAsFixed(4) ==
-            widget.userPosition?.latitude.toStringAsFixed(4) &&
-        position?.longitude.toStringAsFixed(4) ==
-            widget.userPosition?.longitude.toStringAsFixed(4)) {
-      isCentered = true;
-    }
-    if (isCentered != _isCameraCenteredOnUser) {
-      setState(() {
-        _isCameraCenteredOnUser = isCentered;
-        widget.isCameraCentredOnUserCallback?.call(isCentered);
-      });
-    }
-  }
-
-  @override
-  Future<void> moveCameraToLocation(LatLng location) async {
-    final zoom = (await _mapController.getCameraPosition()).zoom;
-    _mapController.moveCamera(
-      yandex.CameraUpdate.newCameraPosition(
-        yandex.CameraPosition(
-          target: yandex.Point(
-            latitude: location.latitude,
-            longitude: location.longitude,
-          ),
-          zoom: max(widget.interactivePolygonVisibilityThreshold, zoom),
-        ),
-      ),
-      animation: const yandex.MapAnimation(duration: 1),
-    );
-  }
-
-  @override
-  Future<void> moveCameraToMatchBBox(BBox bbox) => _mapController.moveCamera(
-        yandex.CameraUpdate.newBounds(bbox.toBoundringBox()),
-        animation: const yandex.MapAnimation(duration: 1),
-      );
-
-  @override
-  void onClusterTap(BBox bbox) {
-    moveCameraToMatchBBox(bbox);
-  }
-
-  @override
-  void onMapTap(LatLng latLng) {
-    widget.onMapTap?.call(latLng);
-  }
 }
