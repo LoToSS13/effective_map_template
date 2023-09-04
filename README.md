@@ -11,6 +11,12 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages).
 -->
 
+
+|   |Android|IOS|Flutter SDK|flutter_map|
+|---|---|---|---|---|
+|Support|SDK 21+|IOS 12+|>=3.0.6 <4.0.0|5.0.0|
+
+
 This package created for effective work with map, fast customization and simple background changing
 
 ## Features
