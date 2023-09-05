@@ -46,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: const Icon(Icons.add))
       ]),
       body: EffectiveMap(
-        MapSample.osm,
+        MapSample.flutter,
         urlTemplate:
             'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
         initialCameraPosition:

@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:effective_map/src/maps/osm/utils/bbox_extension.dart';
+import 'package:effective_map/src/maps/flutter/utils/bbox_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
@@ -9,17 +9,17 @@ import 'package:effective_map/src/models/bbox.dart';
 import 'package:effective_map/src/models/latlng.dart';
 import 'package:effective_map/src/models/map_controller/map_controller.dart'
     as mc;
-import 'package:effective_map/src/maps/osm/utils/flutter_map_extension.dart';
+import 'package:effective_map/src/maps/flutter/utils/flutter_map_extension.dart';
 
 const _maxCameraZoom = 19.0;
 const _interactivePolygonVisibilityThreshold = 17.3;
 
-class OSMMapController extends mc.MapController {
+class FlutterMapController extends mc.MapController {
   final AnimatedMapController _controller;
   final double maxCameraZoom;
   final double interactivePolygonVisibilityThreshold;
 
-  OSMMapController(
+  FlutterMapController(
       {required AnimatedMapController controller,
       this.maxCameraZoom = _maxCameraZoom,
       this.interactivePolygonVisibilityThreshold =

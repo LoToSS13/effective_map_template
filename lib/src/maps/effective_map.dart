@@ -8,7 +8,7 @@ import 'package:effective_map/src/models/map_position.dart' as mp;
 
 enum MapSample {
   yandex,
-  osm,
+  flutter,
 }
 
 class EffectiveMap extends StatelessWidget {
@@ -25,7 +25,7 @@ class EffectiveMap extends StatelessWidget {
 
   /// Callback method for when user taps on map
   ///
-  /// Use instead of [EffectiveMap.onObjectTap] for [MapSample.osm] and handle it by received object position
+  /// Use instead of [EffectiveMap.onObjectTap] for [MapSample.flutter] and handle it by received object position
   final void Function(LatLng latLng)? onMapTap;
 
   /// Callback method for when user taps on cluster
@@ -38,7 +38,7 @@ class EffectiveMap extends StatelessWidget {
   ///
   /// Works only for [MapSample.yandex]
   ///
-  /// If needed in [MapSample.osm] you have to use [EffectiveMap.onMapTap]
+  /// If needed in [MapSample.flutter] you have to use [EffectiveMap.onMapTap]
   final void Function(MapObjectWithGeometry object)? onObjectTap;
 
   /// Callback method for when the map is ready to be used.
@@ -56,19 +56,19 @@ class EffectiveMap extends StatelessWidget {
 
   /// URL for card background
   ///
-  /// Needs only for [MapSample.osm]
+  /// Needs only for [MapSample.flutter]
   ///
   ///[ MapSample.yandex] uses yandex background
   final String? urlTemplate;
 
   /// User agent package name
   ///
-  /// Needs only for [MapSample.osm]
+  /// Needs only for [MapSample.flutter]
   final String? userAgentPackageName;
 
   /// User position
   ///
-  /// Needs only for [MapSample.osm]
+  /// Needs only for [MapSample.flutter]
   ///
   /// [MapSample.yandex] gets user position itself, but you have to handle persmission
   final LatLng? userPosition;
@@ -81,12 +81,12 @@ class EffectiveMap extends StatelessWidget {
 
   /// Min camera zoom
   ///
-  /// Works only for [MapSample.osm]
+  /// Works only for [MapSample.flutter]
   final double? minCameraZoom;
 
   /// Max camera zoom
   ///
-  /// Works only for [MapSample.osm]
+  /// Works only for [MapSample.flutter]
   final double? maxCameraZoom;
 
   /// Initial camera zoom
@@ -153,7 +153,7 @@ class EffectiveMap extends StatelessWidget {
             areTilesVisible: areTilesVisible,
             areUserLocationVisible: areUserPositionVisible,
           ),
-        MapSample.osm => OSMMap(
+        MapSample.flutter => FlutterMap(
             //Data
             tiles: tiles,
             layers: layers,

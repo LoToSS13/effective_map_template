@@ -4,7 +4,7 @@ import 'package:effective_map/src/models/styles/marker_style.dart';
 import 'package:effective_map/src/models/styles/object_style.dart';
 import 'package:effective_map/src/models/styles/user_marker_style.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map/flutter_map.dart' as flutter_map;
 import 'package:flutter_map/plugin_api.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
@@ -24,14 +24,14 @@ import 'package:effective_map/src/models/map_object_wrappers/multi_polygon_wrapp
 import 'package:effective_map/src/models/map_object_wrappers/multi_polyline_wrapper.dart';
 import 'package:effective_map/src/models/map_object_wrappers/polygon_wrapper.dart';
 import 'package:effective_map/src/models/map_object_wrappers/polyline_wrapper.dart';
-import 'package:effective_map/src/maps/osm/map_controller/osm_map_controller.dart';
+import 'package:effective_map/src/maps/flutter/map_controller/flutter_map_controller.dart';
 import 'package:effective_map/src/maps/i_map_state.dart';
-import 'package:effective_map/src/maps/osm/utils/bbox_extension.dart';
-import 'package:effective_map/src/maps/osm/utils/cached_tile_provider.dart';
-import 'package:effective_map/src/maps/osm/utils/flutter_map_extension.dart';
-import 'package:effective_map/src/maps/osm/view/widgets/any_map_object_layer.dart';
-import 'package:effective_map/src/maps/osm/view/widgets/cluster_widget.dart';
-import 'package:effective_map/src/maps/osm/view/widgets/user_location_layer.dart';
+import 'package:effective_map/src/maps/flutter/utils/bbox_extension.dart';
+import 'package:effective_map/src/maps/flutter/utils/cached_tile_provider.dart';
+import 'package:effective_map/src/maps/flutter/utils/flutter_map_extension.dart';
+import 'package:effective_map/src/maps/flutter/view/widgets/any_map_object_layer.dart';
+import 'package:effective_map/src/maps/flutter/view/widgets/cluster_widget.dart';
+import 'package:effective_map/src/maps/flutter/view/widgets/user_location_layer.dart';
 
 const _initialCameraPosition =
     lat_lng.LatLng(latitude: 55.796391, longitude: 49.108891);
@@ -47,7 +47,7 @@ const _defaultTileTransition = TileDisplay.fadeIn(
 
 const _clusterAnimationsDuration = Duration(milliseconds: 100);
 
-class OSMMap extends StatefulWidget {
+class FlutterMap extends StatefulWidget {
   final void Function(mp.MapPosition position, bool finished)?
       onCameraPositionChanged;
   final void Function(lat_lng.LatLng latLng)? onMapTap;
@@ -73,7 +73,7 @@ class OSMMap extends StatefulWidget {
 
   final UserMarkerStyle userMarkerStyle;
 
-  const OSMMap({
+  const FlutterMap({
     super.key,
     required this.tiles,
     required this.layers,
@@ -108,10 +108,10 @@ class OSMMap extends StatefulWidget {
         urlTemplate = urlTemplate ?? '';
 
   @override
-  State<OSMMap> createState() => _OSMMapState();
+  State<FlutterMap> createState() => _FlutterMapState();
 }
 
-class _OSMMapState extends State<OSMMap>
+class _FlutterMapState extends State<FlutterMap>
     with TickerProviderStateMixin
     implements IMapState<MapObject, Marker, Widget> {
   late final AnimatedMapController _mapController =
@@ -343,7 +343,7 @@ class _OSMMapState extends State<OSMMap>
       });
 
   @override
-  Widget build(BuildContext context) => FlutterMap(
+  Widget build(BuildContext context) => flutter_map.FlutterMap(
         mapController: _mapController.mapController,
         options: MapOptions(
           center: widget.initialCameraPosition.toLatLng(),
@@ -360,7 +360,7 @@ class _OSMMapState extends State<OSMMap>
           onTap: (position, latLng) => widget.onMapTap?.call(latLng.toLatLng()),
           onMapReady: () {
             widget.onMapCreate?.call(
-              OSMMapController(
+              FlutterMapController(
                   controller: _mapController,
                   maxCameraZoom: widget.maxCameraZoom,
                   interactivePolygonVisibilityThreshold:

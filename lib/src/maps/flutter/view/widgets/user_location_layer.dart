@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 
 import 'package:effective_map/src/models/latlng.dart';
-import 'package:effective_map/src/maps/osm/utils/flutter_map_extension.dart';
+import 'package:effective_map/src/maps/flutter/utils/flutter_map_extension.dart';
 
 class UserLocationLayer extends StatelessWidget {
   final LatLng location;
