@@ -25,7 +25,7 @@ You can just switch `MapSample` and package will use [flutter_map](https://pub.d
 
 ## Getting started
 
-To use `MapSample.yandex` you have to follow this [getting started guide](https://pub.dev/packages/yandex_mapkit#getting-started)
+To use `MapSample.yandex` you have to follow this [getting started guide](https://github.com/rvachev/yandex_mapkit#readme)
 
 For another `MapSample` you need to do nothing except import library
 
