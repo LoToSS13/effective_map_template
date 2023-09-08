@@ -1,3 +1,5 @@
+import 'package:effective_map/src/maps/utils/bbox_former.dart';
+import 'package:effective_map/src/models/bbox.dart';
 import 'package:effective_map/src/models/converters/geometry_converter.dart';
 import 'package:effective_map/src/models/latlng.dart';
 
@@ -15,6 +17,20 @@ sealed class MapObjectGeometry {
   final LatLng center;
 
   const MapObjectGeometry({required this.center});
+
+  BBox? get bbox => mapOrNull(
+        point: (geometry) => createBBoxFrom([geometry]),
+        line: (geometry) => createBBoxFrom(geometry.points),
+        multiline: (geometry) => createBBoxFrom(
+          geometry.lines.fold<List<PointObjectGeometry>>(
+              [], (points, line) => points..addAll(line.points)),
+        ),
+        linearRing: (geometry) => createBBoxFrom(geometry.points),
+        polygon: (geometry) => createBBoxFrom(geometry.outerRing.points),
+        multipolygon: (geometry) => createBBoxFrom(geometry.polygons
+            .fold<List<PointObjectGeometry>>([],
+                (points, polygon) => points..addAll(polygon.outerRing.points))),
+      );
 
   GeometryType get type => switch (this) {
         PointObjectGeometry() => GeometryType.point,
