@@ -25,10 +25,7 @@ dependencies:
 
   flutter_map: ^5.0.0
   flutter_map_animations: ^0.4.1
-  flutter_map_marker_cluster:
-    git:
-      url: https://github.com/lpongetti/flutter_map_marker_cluster
-      ref: dee9902
+  flutter_map_marker_cluster: ^1.2.0
   latlong2: ^0.9.0
 
 dev_dependencies:
