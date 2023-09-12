@@ -91,11 +91,18 @@ class _YandexMapState extends State<YandexMap>
 
   @override
   void initState() {
-    _init();
+    _convert();
     super.initState();
   }
 
-  void _init() {
+  @override
+  void didUpdateWidget(covariant YandexMap oldWidget) {
+    _convert();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  void _convert() {
+    _layers.clear();
     for (final layer in widget.layers) {
       final widget = convertLayer(layer);
       if (widget != null) {

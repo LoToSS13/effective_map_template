@@ -124,7 +124,7 @@ class _FlutterMapState extends State<FlutterMap>
 
   @override
   void initState() {
-    _init();
+    _convert();
     super.initState();
   }
 
@@ -134,7 +134,14 @@ class _FlutterMapState extends State<FlutterMap>
     super.dispose();
   }
 
-  void _init() {
+  @override
+  void didUpdateWidget(covariant FlutterMap oldWidget) {
+    _convert();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  void _convert() {
+    _layers.clear();
     for (final layer in widget.layers) {
       final widget = convertLayer(layer);
       if (widget != null) {
