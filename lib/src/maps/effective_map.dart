@@ -7,7 +7,6 @@ import 'package:effective_map/src/models/map_controller/map_controller.dart'
 import 'package:effective_map/src/models/map_position.dart' as mp;
 
 enum MapSample {
-  yandex,
   flutter,
 }
 
@@ -127,32 +126,6 @@ class EffectiveMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => switch (mapSample) {
-        MapSample.yandex => YandexMap(
-            //Data
-            tiles: tiles,
-            layers: layers,
-
-            //Functions
-            onCameraPositionChanged: onCameraPositionChanged,
-            onMapTap: onMapTap,
-            onClusterTap: onClusterTap,
-            onMarkerTap: onMarkerTap,
-            onObjectTap: onObjectTap,
-            onMapCreate: onMapCreate,
-
-            //Customization
-            interactivePolygonVisibilityThreshold:
-                interactivePolygonVisibilityThreshold,
-            userMarkerStyle: userMarkerStyle,
-            initialCameraPosition: mp.MapPosition(
-              center: initialCameraPosition,
-              zoom: initialCameraZoom,
-            ),
-
-            //Flags
-            areTilesVisible: areTilesVisible,
-            areUserLocationVisible: areUserPositionVisible,
-          ),
         MapSample.flutter => FlutterMap(
             //Data
             tiles: tiles,
