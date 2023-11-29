@@ -1,8 +1,8 @@
 import 'package:effective_map/src/models/map_position.dart' as mp;
 import 'package:effective_map/src/models/marker.dart' as marker;
 import 'package:effective_map/src/models/latlng.dart' as lat_lng;
+import 'package:flutter_map/flutter_map.dart';
 
-import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
 
 extension MapPositionConverter on MapPosition {

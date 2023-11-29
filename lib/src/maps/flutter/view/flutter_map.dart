@@ -5,7 +5,7 @@ import 'package:effective_map/src/models/styles/object_style.dart';
 import 'package:effective_map/src/models/styles/user_marker_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart' as flutter_map;
-import 'package:flutter_map/plugin_api.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
@@ -222,8 +222,8 @@ class _FlutterMapState extends State<FlutterMap>
         height: style.height,
         width: style.width,
         point: packageMarker.position.toLatLng(),
-        anchorPos: AnchorPos.align(AnchorAlign.top),
-        builder: (context) => GestureDetector(
+        alignment: Alignment.topCenter,
+        child: GestureDetector(
           onTap: () => widget.onMarkerTap?.call(packageMarker),
           child: Align(
             alignment: Alignment(style.offset.dx, style.offset.dy),
@@ -353,14 +353,17 @@ class _FlutterMapState extends State<FlutterMap>
   Widget build(BuildContext context) => flutter_map.FlutterMap(
         mapController: _mapController.mapController,
         options: MapOptions(
-          center: widget.initialCameraPosition.toLatLng(),
-          zoom: widget.initialCameraZoom,
+          initialCenter: widget.initialCameraPosition.toLatLng(),
+          initialZoom: widget.initialCameraZoom,
           minZoom: widget.minCameraZoom,
           maxZoom: widget.maxCameraZoom,
-          interactiveFlags: InteractiveFlag.pinchZoom |
-              InteractiveFlag.drag |
-              InteractiveFlag.doubleTapZoom |
-              InteractiveFlag.pinchMove,
+          interactionOptions: const InteractionOptions(
+            flags: InteractiveFlag.pinchZoom |
+                InteractiveFlag.drag |
+                InteractiveFlag.doubleTapZoom |
+                InteractiveFlag.pinchMove |
+                InteractiveFlag.rotate,
+          ),
           onPositionChanged: (position, hasGesture) => widget
               .onCameraPositionChanged
               ?.call(position.toMapPosition(), !hasGesture),
@@ -393,14 +396,13 @@ class _FlutterMapState extends State<FlutterMap>
             tileDisplay: _defaultTileTransition,
             subdomains: const ['a', 'b', 'c'],
             userAgentPackageName: widget.userAgentPackageName,
-            tileProvider: CachedTileProvider(),
+            tileProvider: CachedTileProvider(headers: {}),
           ),
           if (widget.areTilesVisible && widget.tiles.isNotEmpty)
             TileLayer(
               urlTemplate: widget.tiles.first.baseUrl,
               maxZoom: widget.maxCameraZoom,
               panBuffer: 3,
-              backgroundColor: Colors.transparent,
               zoomOffset: 1,
               tileProvider: CachedTileProvider(
                 headers: widget.tiles.first.headers,

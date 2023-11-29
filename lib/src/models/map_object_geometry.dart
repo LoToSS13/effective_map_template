@@ -18,19 +18,23 @@ sealed class MapObjectGeometry {
 
   const MapObjectGeometry({required this.center});
 
-  BBox? get bbox => mapOrNull(
-        point: (geometry) => createBBoxFrom([geometry]),
-        line: (geometry) => createBBoxFrom(geometry.points),
-        multiline: (geometry) => createBBoxFrom(
-          geometry.lines.fold<List<PointObjectGeometry>>(
-              [], (points, line) => points..addAll(line.points)),
-        ),
-        linearRing: (geometry) => createBBoxFrom(geometry.points),
-        polygon: (geometry) => createBBoxFrom(geometry.outerRing.points),
-        multipolygon: (geometry) => createBBoxFrom(geometry.polygons
-            .fold<List<PointObjectGeometry>>([],
-                (points, polygon) => points..addAll(polygon.outerRing.points))),
-      );
+  BBox get bbox => switch (this) {
+        PointObjectGeometry point => createBBoxFrom([point]),
+        LineObjectGeometry line => createBBoxFrom(line.points),
+        MultiLineObjectGeometry multiline => createBBoxFrom(
+            multiline.lines.fold<List<PointObjectGeometry>>(
+                [], (points, line) => points..addAll(line.points)),
+          ),
+        PolygonObjectGeometry polygon =>
+          createBBoxFrom(polygon.outerRing.points),
+        MultiPolygonObjectGeometry multipolygon => createBBoxFrom(
+            multipolygon.polygons.fold<List<PointObjectGeometry>>(
+              [],
+              (points, polygon) => points..addAll(polygon.outerRing.points),
+            ),
+          ),
+        LinearRingObjectGeometry ring => createBBoxFrom(ring.points),
+      };
 
   GeometryType get type => switch (this) {
         PointObjectGeometry() => GeometryType.point,

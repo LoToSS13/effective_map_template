@@ -23,7 +23,7 @@ class UserLocationLayer extends StatelessWidget {
             height: style.height * style.devicePixelRatio,
             width: style.width * style.devicePixelRatio,
             point: location.toLatLng(),
-            builder: (context) => Container(
+            child: Container(
               clipBehavior: Clip.antiAliasWithSaveLayer,
               height: style.radius * 2 * style.devicePixelRatio,
               width: style.radius * 2 * style.devicePixelRatio,

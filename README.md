@@ -11,27 +11,26 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages).
 -->
 
-
-|   |Android|IOS|Flutter SDK|flutter_map|
-|---|---|---|---|---|
-|Support|SDK 21+|IOS 12+|>=3.0.6 <4.0.0|5.0.0|
-
+|         | Android | IOS     | Flutter SDK    | flutter_map |
+| ------- | ------- | ------- | -------------- | ----------- |
+| Support | SDK 21+ | IOS 12+ | >=3.0.6 <4.0.0 | 6.0.1       |
 
 This package created for effective work with map, fast customization and simple background changing
 
 ## Features
 
-You can just switch `MapSample` and package will use [flutter_map](https://pub.dev/packages/flutter_map) or [yandex_map_kit](https://pub.dev/packages/yandex_mapkit) based on your choise
+- Creating geo objects like markers, polygon, polylines and etc.
+- Handling objects taps
+- Clustering markers on purpose
+
+Only [flutter_map](https://pub.dev/packages/flutter_map) is supported for now
 
 ## Getting started
 
-To use `MapSample.yandex` you have to follow this [getting started guide](https://github.com/rvachev/yandex_mapkit#getting-started)
-
-For another `MapSample` you need to do nothing except import library
+- Add dependency in your project's `pubspec.yaml`
+- Import library where it is needed
+- Enjoy
 
 ## Usage
 
-You can find usege in [example folder](https://github.com/LoToSS13/effective_map_template/tree/main/example/effective_map_example)
-
-
-
+You can find usage in [example folder](https://github.com/LoToSS13/effective_map_template/tree/main/example/effective_map_example)
