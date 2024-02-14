@@ -1,11 +1,11 @@
 name: effective_map_example
 description: Effective map package example.
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.6 <4.0.0'
+  sdk: ">=3.0.6 <4.0.0"
 
 dependencies:
   flutter:
@@ -19,40 +19,8 @@ dev_dependencies:
     path: ../../
   flutter_lints: ^2.0.0
 
-
 flutter:
   uses-material-design: true
 
-  assets: 
+  assets:
     - assets/
-
-   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
