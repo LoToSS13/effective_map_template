@@ -7,8 +7,7 @@ import 'package:flutter_map_animations/flutter_map_animations.dart';
 
 import 'package:effective_map/src/models/bbox.dart';
 import 'package:effective_map/src/models/latlng.dart';
-import 'package:effective_map/src/models/map_controller/map_controller.dart'
-    as mc;
+import 'package:effective_map/src/models/map_controller/map_controller.dart' as mc;
 import 'package:effective_map/src/maps/flutter/utils/flutter_map_extension.dart';
 
 const _maxCameraZoom = 19.0;
@@ -22,22 +21,21 @@ class FlutterMapController extends mc.MapController {
   FlutterMapController(
       {required AnimatedMapController controller,
       this.maxCameraZoom = _maxCameraZoom,
-      this.interactivePolygonVisibilityThreshold =
-          _interactivePolygonVisibilityThreshold})
+      this.interactivePolygonVisibilityThreshold = _interactivePolygonVisibilityThreshold})
       : _controller = controller;
 
   @override
   Future<void> moveTo(LatLng latlng) async => _controller.animateTo(
         dest: latlng.toLatLng(),
-        zoom: max(interactivePolygonVisibilityThreshold,
-            _controller.mapController.zoom),
+        zoom: max(interactivePolygonVisibilityThreshold, _controller.mapController.camera.zoom),
       );
 
   @override
-  Future<void> fitBBox(BBox bbox) async => _controller.animatedFitBounds(
-        bbox.toBounds(),
-        options: FitBoundsOptions(
-          padding: const EdgeInsets.all(12),
+  Future<void> fitBBox(BBox bbox, {EdgeInsets padding = const EdgeInsets.all(12)}) async =>
+      _controller.animatedFitCamera(
+        cameraFit: CameraFit.bounds(
+          bounds: bbox.toBounds(),
+          padding: padding,
           maxZoom: maxCameraZoom,
         ),
       );
@@ -49,8 +47,8 @@ class FlutterMapController extends mc.MapController {
   Future<void> zoomOut() async => _controller.animatedZoomOut();
 
   @override
-  Future<BBox?> get bbox async => _controller.mapController.bounds?.toBBox();
+  Future<BBox?> get bbox async => _controller.mapController.camera.visibleBounds.toBBox();
 
   @override
-  Future<double> get zoom async => _controller.mapController.zoom;
+  Future<double> get zoom async => _controller.mapController.camera.zoom;
 }
