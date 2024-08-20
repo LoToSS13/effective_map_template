@@ -6,10 +6,15 @@ import 'package:effective_map/src/models/latlng.dart';
 
 @immutable
 class BBox {
-  final LatLng upperCorner;
-  final LatLng lowerCorner;
+  final LatLng _upperCorner;
+  final LatLng _lowerCorner;
 
-  const BBox({required this.upperCorner, required this.lowerCorner});
+  BBox({required LatLng upperCorner, required LatLng lowerCorner})
+      : _upperCorner = upperCorner.max(lowerCorner),
+        _lowerCorner = lowerCorner.min(upperCorner);
+
+  LatLng get upperCorner => _upperCorner;
+  LatLng get lowerCorner => _lowerCorner;
 
   LatLng get center {
     /* https://stackoverflow.com/a/4656937
