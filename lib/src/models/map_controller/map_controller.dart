@@ -8,6 +8,6 @@ abstract class MapController {
 
   Future<void> zoomIn();
   Future<void> zoomOut();
-  Future<void> fitBBox(BBox bbox, {EdgeInsets padding = const EdgeInsets.all(12)});
+  Future<void> fitBBox(BBox bbox, {EdgeInsets padding = const EdgeInsets.all(12), double? maxCameraZoom});
   Future<void> moveTo(LatLng latlng);
 }

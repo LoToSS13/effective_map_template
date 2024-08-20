@@ -31,12 +31,12 @@ class FlutterMapController extends mc.MapController {
       );
 
   @override
-  Future<void> fitBBox(BBox bbox, {EdgeInsets padding = const EdgeInsets.all(12)}) async =>
+  Future<void> fitBBox(BBox bbox, {EdgeInsets padding = const EdgeInsets.all(12), double? maxCameraZoom}) async =>
       _controller.animatedFitCamera(
         cameraFit: CameraFit.bounds(
           bounds: bbox.toBounds(),
           padding: padding,
-          maxZoom: maxCameraZoom,
+          maxZoom: maxCameraZoom ?? this.maxCameraZoom,
         ),
       );
 
